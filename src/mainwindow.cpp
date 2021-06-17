@@ -218,6 +218,7 @@ bool MainWindow::fileOpen()
 
 	g_sprFilePath = dialog.directory();
 	document = std::move(doc);
+	document->m_window = this;
 	SetAsterisk(false);
 
 	return true;
@@ -464,6 +465,7 @@ void MainWindow::ImportSprite()
 		auto material = command->GetObject().get()->material.get();
 		material->ext.unlit.is_empty = false;
 		material->SetImage(image, &material->image_slots[(int)Material::Tex::BaseColor]);
+		material->Prepare(ui->viewWidget);
 
 		document->addCommand(std::move(command));
 	}

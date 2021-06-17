@@ -160,7 +160,7 @@ void Image::LoadFromFile()
 		}
 		else
 		{
-			sprite = double_image(sprite);
+		//	sprite = double_image(sprite);
 		//	sprite = double_image(sprite);
 
 			PackSpriteSheet sheet(sprite.sizes);
