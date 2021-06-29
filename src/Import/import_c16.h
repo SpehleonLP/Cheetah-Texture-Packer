@@ -22,6 +22,20 @@ public:
 	{
 	}
 
+	SpriteFile const& operator=(SpriteFile const&) = delete;
+	SpriteFile const& operator=(SpriteFile && file)
+	{
+		sizes		   = std::move(file.sizes);
+		pointers	   = std::move(file.pointers);
+		heap		   = std::move(file.heap);
+		count		   = std::move(file.count);
+		internalFormat = std::move(file.internalFormat);
+		format         = std::move(file.format);
+		type           = std::move(file.type);
+
+		return *this;
+	}
+
 	auto size() const { return count; }
 	bool empty() const { return !count; }
 
