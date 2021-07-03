@@ -401,6 +401,7 @@ inline void to_json(nlohmann::json & json, MaterialExtensions const & material)
 #if KHR_SHEEN
 	fx::gltf::detail::WriteField("KHR_materials_sheen", json, material.sheen);
 #endif
+	fx::gltf::detail::WriteField("KHR_materials_clearcoat", json, material.clearcoat);
 }
 
 void from_json(nlohmann::json const& json, MaterialExtensions & material)
@@ -411,6 +412,7 @@ void from_json(nlohmann::json const& json, MaterialExtensions & material)
 #if KHR_SHEEN
 	fx::gltf::detail::ReadOptionalField("KHR_materials_sheen", json, material.sheen);
 #endif
+	fx::gltf::detail::ReadOptionalField("KHR_materials_clearcoat", json, material.clearcoat);
 }
 
 //image is the orignal image not the compressed image.

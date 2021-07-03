@@ -44,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 //configure tree
 	model.reset(new SpriteModel(this));
-	model->window = this;
 
 	ui->treeView->setModel(model.get());
 	ui->treeView->setColumnWidth(0, ui->treeView->columnWidth(0)*2);
@@ -219,7 +218,10 @@ bool MainWindow::fileOpen()
 	g_sprFilePath = dialog.directory();
 	document = std::move(doc);
 	document->m_window = this;
+
 	SetAsterisk(false);
+
+	model->layoutChanged();
 
 	return true;
 }

@@ -31,6 +31,7 @@ struct RenderData
 struct MaterialExtensions
 {
 	KHR::materials::pbrSpecularGlossiness pbrSpecularGlossiness;
+	KHR::materials::clearcoat			  clearcoat;
 	KHR::materials::unlit				  unlit;
 
 #if KHR_SHEEN
@@ -41,6 +42,8 @@ struct MaterialExtensions
 #if KHR_SHEEN
 		&& sheen.empty()
 #endif
+
+		&& clearcoat.empty()
 		; };
 };
 

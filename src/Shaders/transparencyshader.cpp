@@ -3,7 +3,7 @@
 #include "src/widgets/glviewwidget.h"
 
 #define SHADER(k) "#version 150\n" #k
-static const char * kVert();
+
 static const char * kFrag();
 
 TransparencyShader TransparencyShader::Shader;

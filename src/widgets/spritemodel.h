@@ -48,7 +48,7 @@ public:
 		 int8_t          padding[3];
 	};
 
-	SpriteModel(QObject *parent = nullptr);
+	SpriteModel(MainWindow *parent = nullptr);
 	virtual ~SpriteModel() = default;
 
 	void Render(GLViewWidget *, QModelIndex const& index);

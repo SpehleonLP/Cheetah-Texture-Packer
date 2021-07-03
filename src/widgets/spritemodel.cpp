@@ -95,8 +95,9 @@ Material::Tex GetTexture(MaterialProperty prop)
 }
 
 
-SpriteModel::SpriteModel(QObject * parent) :
-	super(parent)
+SpriteModel::SpriteModel(MainWindow * parent) :
+	super(parent),
+	window(parent)
 {
 //unit test model
 	auto model = GetModel();

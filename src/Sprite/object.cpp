@@ -56,10 +56,11 @@ Object::Object(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document 
 	}
 
 	material.reset(new Material);
+	*static_cast<fx::gltf::Material*>(material.get()) = doc.materials[spr.material];
 
 //copy material
-	const nlohmann::json::const_iterator extensions =  doc.materials[spr.material].extensionsAndExtras.find("extensions");
-	if(extensions != doc.materials[spr.material].extensionsAndExtras.end())
+	const nlohmann::json::const_iterator extensions =  material->extensionsAndExtras.find("extensions");
+	if(extensions != material->extensionsAndExtras.end())
 	{
 		auto itr = extensions->find("KHR_materials_pbrSpecularGlossiness");
 
@@ -75,11 +76,16 @@ Object::Object(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document 
 		itr = extensions->find("KHR_materials_sheen");
 
 		if(itr != extensions->end())
-			KHR::materials::from_json(itr->get<nlohmann::json>(), material.get()->sheen);
+			KHR::materials::from_json(itr->get<nlohmann::json>(), material.get()->ext.sheen);
 #endif
+
+		itr = extensions->find("KHR_materials_clearcoat");
+
+		if(itr != extensions->end())
+			KHR::materials::from_json(itr->get<nlohmann::json>(), material.get()->ext.clearcoat);
 	}
 
-	*static_cast<fx::gltf::Material*>(material.get()) = doc.materials[spr.material];
+	 material->extensionsAndExtras.clear();
 }
 
 
