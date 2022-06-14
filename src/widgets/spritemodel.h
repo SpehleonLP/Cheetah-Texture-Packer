@@ -108,7 +108,7 @@ inline bool SpriteModel::ArrayFromString(std::array<float, num> & dst, QString c
 	std::array<float, num> eax;
 	bool okay;
 
-	auto tokens = string.split(' ', QString::SkipEmptyParts);
+	auto tokens = string.split(' ', Qt::SkipEmptyParts);
 
 	if(tokens.size() != num)
 		return false;

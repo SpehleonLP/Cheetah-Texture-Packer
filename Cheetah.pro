@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += core gui widgets opengl openglwidgets
 
 TARGET = cheetah-texture-packer
 
@@ -53,6 +51,8 @@ SOURCES += src/main.cpp\
 	src/Sprite/countedgltfimage.cpp \
 	src/Sprite/document.cpp \
 	src/Sprite/image.cpp \
+	src/Sprite/imagemanager.cpp \
+	src/Sprite/imagetexturecoordinates.cpp \
 	src/Sprite/material.cpp \
 	src/Sprite/object.cpp \
 	src/Sprite/spritejson.cpp \
@@ -61,6 +61,7 @@ SOURCES += src/main.cpp\
 	src/Support/imagesupport.cpp \
 	src/Support/packaccessor.cpp \
 	src/Support/qt_to_gl.cpp \
+	src/Support/unpackmemo.cpp \
 	src/commandlist.cpp \
 	src/imagemetadata.cpp \
 	src/lf_math.cpp \
@@ -106,6 +107,8 @@ HEADERS  += src/mainwindow.h \
 	src/Sprite/countedgltfimage.h \
 	src/Sprite/document.h \
 	src/Sprite/image.h \
+	src/Sprite/imagemanager.h \
+	src/Sprite/imagetexturecoordinates.h \
 	src/Sprite/material.h \
 	src/Sprite/object.h \
 	src/Sprite/spritejson.h \
@@ -117,6 +120,7 @@ HEADERS  += src/mainwindow.h \
 	src/Support/imagesupport.h \
 	src/Support/packaccessor.h \
 	src/Support/qt_to_gl.h \
+	src/Support/unpackmemo.h \
 	src/Support/vectoroperations.hpp \
 	src/commandinterface.hpp \
 	src/commandlist.h \

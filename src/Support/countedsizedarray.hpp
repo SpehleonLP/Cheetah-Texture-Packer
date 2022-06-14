@@ -108,6 +108,18 @@ typedef CountedSizedArray<T> self_type;
 		return true;
 	}
 
+	bool CanMerge(self_type const& it)
+	{
+		if(m_array == it.m_array)
+			return true;
+
+		if(m_array->m_size != it.m_array->m_size
+		|| memcmp(&m_array->m_data[0], &it.m_array->m_data[0], sizeof(value_type) * m_array->m_size))
+			return false;
+
+		return true;
+	}
+
 	void const* data() const { return m_array == nullptr? nullptr : &m_array->m_data[0]; }
 
 private:

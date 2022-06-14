@@ -844,7 +844,7 @@ bool SpriteModel::VectorFromString(CountedSizedArray<uint16_t> & dst, QString co
 {
 	bool okay;
 
-	auto tokens = string.split(' ', QString::SkipEmptyParts);
+	auto tokens = string.split(' ', Qt::SkipEmptyParts);
 	CountedSizedArray<uint16_t> eax(tokens.size());
 
 	for(int i = 0; i < tokens.size(); ++i)

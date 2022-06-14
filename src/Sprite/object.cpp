@@ -17,7 +17,7 @@ void Object::RenderAttachments(GLViewWidget *, int )
 
 }
 
-Object::Object(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc) :
+Object::Object(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo) :
 	gl(gl)
 {
 	name = counted_string::MakeShared(spr.name);
@@ -55,37 +55,7 @@ Object::Object(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document 
 			attachments[i].coords.push_back({spr.frames[j].attachments[i][0], spr.frames[j].attachments[i][1]});
 	}
 
-	material.reset(new Material);
-	*static_cast<fx::gltf::Material*>(material.get()) = doc.materials[spr.material];
-
-//copy material
-	const nlohmann::json::const_iterator extensions =  material->extensionsAndExtras.find("extensions");
-	if(extensions != material->extensionsAndExtras.end())
-	{
-		auto itr = extensions->find("KHR_materials_pbrSpecularGlossiness");
-
-		if(itr != extensions->end())
-			KHR::materials::from_json(itr->get<nlohmann::json>(), material.get()->ext.pbrSpecularGlossiness);
-
-		itr = extensions->find("KHR_materials_unlit");
-
-		if(itr != extensions->end())
-			KHR::materials::from_json(itr->get<nlohmann::json>(), material.get()->ext.unlit);
-
-#if KHR_SHEEN
-		itr = extensions->find("KHR_materials_sheen");
-
-		if(itr != extensions->end())
-			KHR::materials::from_json(itr->get<nlohmann::json>(), material.get()->ext.sheen);
-#endif
-
-		itr = extensions->find("KHR_materials_clearcoat");
-
-		if(itr != extensions->end())
-			KHR::materials::from_json(itr->get<nlohmann::json>(), material.get()->ext.clearcoat);
-	}
-
-	 material->extensionsAndExtras.clear();
+	material.reset(new Material(gl, spr, doc, memo));
 }
 
 

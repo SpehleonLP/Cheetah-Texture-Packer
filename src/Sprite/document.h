@@ -29,6 +29,7 @@ struct Document;
 struct Document
 {
 	static std::unique_ptr<Document> OpenFile(GLViewWidget*gl, QFileInfo const& path);
+	static std::unique_ptr<Document> OpenFile(GLViewWidget*gl, QString const& path) { return OpenFile(gl, QFileInfo(path)); }
 
 	Document(GLViewWidget * gl, Sprites::Document const&);
 	Document(GLViewWidget*gl) : imageManager(gl) {}
@@ -38,6 +39,7 @@ struct Document
 	Image::ImageManager   imageManager;
 	PackerSettings        settings;
 
+//object -> materials
 	std::vector<counted_ptr<Object>>   objects;
 	MainWindow *          m_window{};
 
@@ -79,6 +81,7 @@ struct Document
 	GLViewWidget * GetViewWidget() const;
 
 	bool SaveFile(QFileInfo const& path);
+	bool SaveFile(QString const& path) { return SaveFile(QFileInfo(path)); }
 
 	QFileInfo m_path;
 	QString    m_title{"<untitled>"};

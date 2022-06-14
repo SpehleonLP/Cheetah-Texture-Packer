@@ -14,6 +14,7 @@ struct Sprite;
 }
 
 struct PackMemo;
+struct UnpackMemo;
 
 struct Object
 {
@@ -24,7 +25,7 @@ struct Object
 		bool dirty{};
 	};
 
-	Object(GLViewWidget * gl, Sprites::Sprite const&, Sprites::Document const& doc);
+	Object(GLViewWidget * gl, Sprites::Sprite const&, Sprites::Document const& doc, UnpackMemo & memo);
 	Object(GLViewWidget * gl) : gl(gl) {}
 	~Object() { material->Clear(gl); }
 

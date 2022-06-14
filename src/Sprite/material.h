@@ -9,6 +9,7 @@
 struct Document;
 class SpriteSheet;
 struct PackMemo;
+struct UnpackMemo;
 
 namespace Sprites
 {
@@ -53,6 +54,7 @@ public:
 	static int PackDocument(Material * mat, Sprites::Document & doc, PackMemo & mapping);
 
 	Material();
+	Material(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo);
 	~Material() = default;
 
 	enum class Tex : int8_t
@@ -150,21 +152,24 @@ private:
 	CountedSizedArray<glm::u16vec4> m_normalizedCrop{};
 	CountedSizedArray<glm::u16vec4> m_normalizedSprites{};
 
-	CountedSizedArray<glm::vec2>    m_normalizedPositions{};
-	CountedSizedArray<uint16_t>		m_indices{};
-	CountedSizedArray<bool>			m_rotated{};
-
-	CountedSizedArray<Pair>         m_spriteIndices{};
-	CountedSizedArray<Pair>         m_spriteVertices{};
-
+//made in render
 	std::unique_ptr<SpriteSheet>    m_spriteSheet;
-
+//made in set image
 	uint32_t                        m_spriteCount{};
 	glm::u16vec2                    m_sheetSize{};
 
+//made in prepare
 	uint32_t     m_vao{};
 	uint32_t     m_vbo[VBOc]{};
 	uint32_t     m_vboFlags{0};
+
+//made in prepare -> create default arrays
+	CountedSizedArray<glm::vec2>    m_normalizedPositions{};
+	CountedSizedArray<Pair>         m_spriteIndices{};
+	CountedSizedArray<Pair>         m_spriteVertices{};
+
+private:
+	void LoadExtensionsAndExtras();
 };
 
 #endif // MATERIAL_H

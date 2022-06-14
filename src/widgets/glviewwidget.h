@@ -11,6 +11,7 @@
 class MainWindow;
 class QOpenGLDebugLogger;
 class QOpenGLDebugMessage;
+class QMouseEvent;
 
 #define glAssert() displayOpenGlError(__FILE__, __FUNCTION__, __LINE__);
 #define GL_ASSERT _gl glAssert();

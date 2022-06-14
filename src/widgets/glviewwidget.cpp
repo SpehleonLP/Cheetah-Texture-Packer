@@ -309,7 +309,7 @@ void GLViewWidget::wheelEvent(QWheelEvent * wheel)
 
 	if(wheel->modifiers() & Qt::ControlModifier)
 	{
-		if(wheel->orientation() == Qt::Vertical)
+		if(std::fabs(wheel->angleDelta().y()) > std::fabs(wheel->angleDelta().x()))
 		{
       //      if(w->document == nullptr) return;
 #if 0
@@ -336,9 +336,9 @@ void GLViewWidget::wheelEvent(QWheelEvent * wheel)
 			return;
 		}
 	}
-	else if(wheel->buttons() != Qt::MidButton)
+	else if(wheel->buttons() != Qt::MiddleButton)
 	{
-		if(wheel->orientation() == Qt::Horizontal)
+		if(std::fabs(wheel->angleDelta().y()) < std::fabs(wheel->angleDelta().x()))
 		{
             w->ui->horizontalScrollBar->event(wheel);
 		}

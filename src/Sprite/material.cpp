@@ -6,6 +6,7 @@
 #include "Shaders/transparencyshader.h"
 #include "Shaders/unlitshader.h"
 #include "Support/packaccessor.h"
+#include "Support/unpackmemo.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "spritesheet.h"
 #include "spritejson.h"
@@ -25,6 +26,26 @@ Material::Material()
 	emissiveTexture.texCoord  = 2 + (int)Tex::Emission;
 }
 
+Material::Material(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo) :
+	Material()
+{
+	*static_cast<fx::gltf::Material*>(this) = doc.materials[spr.material];
+
+	LoadExtensionsAndExtras();
+
+#define UnpackImage(TEXTURE, ST) \
+	SetImage(memo.UnpackImage(gl, spr, doc, TEXTURE), &image_slots[(int)ST]); \
+	tex_coords[(int)ST] = pbrMetallicRoughness.baseColorTexture.texCoord
+
+	UnpackImage(pbrMetallicRoughness.baseColorTexture, Tex::BaseColor);
+	UnpackImage(ext.pbrSpecularGlossiness.diffuseTexture, Tex::Diffuse);
+	UnpackImage(pbrMetallicRoughness.metallicRoughnessTexture, Tex::MetallicRoughness);
+	UnpackImage(ext.pbrSpecularGlossiness.specularGlossinessTexture, Tex::SpecularGlossiness);
+	UnpackImage(normalTexture, Tex::Normal);
+	UnpackImage(occlusionTexture, Tex::Occlusion);
+	UnpackImage(emissiveTexture, Tex::Emission);
+}
+
 void Material::Clear(GLViewWidget * gl)
 {
 	if(m_spriteSheet)
@@ -42,6 +63,9 @@ void Material::Clear(GLViewWidget * gl)
 
 void Material::SetImage(counted_ptr<Image> image, counted_ptr<Image> * slot)
 {
+	if(image == nullptr)
+		return;
+
 	int tex = (slot - &image_slots[0]);
 
 	if(!(0 <= tex && tex < (int)Tex::Total))
@@ -155,21 +179,21 @@ void Material::CreateDefaultArrays(GLViewWidget* gl)
 	CreateIdBuffer(gl);
 
 	{
-		m_indices = CountedSizedArray<uint16_t>(m_spriteCount * 6);
+		std::vector<uint16_t> indices(m_spriteCount*6);
 
 		for(uint32_t i = 0; i < m_spriteCount; ++i)
 		{
-			m_indices[i*6+0] = i*4+0;
-			m_indices[i*6+1] = i*4+1;
-			m_indices[i*6+2] = i*4+3;
+			indices[i*6+0] = i*4+0;
+			indices[i*6+1] = i*4+1;
+			indices[i*6+2] = i*4+3;
 
-			m_indices[i*6+3] = i*4+3;
-			m_indices[i*6+4] = i*4+1;
-			m_indices[i*6+5] = i*4+2;
+			indices[i*6+3] = i*4+3;
+			indices[i*6+4] = i*4+1;
+			indices[i*6+5] = i*4+2;
 		}
 
 		_gl glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vbo[v_indices]); DEBUG_GL
-		_gl glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(m_indices[0]), &m_indices[0], GL_DYNAMIC_DRAW); DEBUG_GL
+		_gl glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_DYNAMIC_DRAW); DEBUG_GL
 	}
 
 //create null textures
@@ -490,7 +514,6 @@ int Material::PackDocument(Material * This, Sprites::Document & doc, PackMemo & 
 void Material::PackFrames(Sprites::Sprite & sprite, Sprites::Document & , PackMemo & )
 {
 	assert(sprite.frames.size() == noFrames());
-	assert(m_indices.size());
 
 //step 1 copy data into frames
 	for(uint32_t i = 0; i < sprite.frames.size(); ++i)
@@ -500,7 +523,36 @@ void Material::PackFrames(Sprites::Sprite & sprite, Sprites::Document & , PackMe
 		memcpy(&sprite.frames[i].texCoord0[0], &m_normalizedCrop[i][0], sizeof(glm::i16vec4));
 		memcpy(&sprite.frames[i].texCoord1[0], &m_normalizedCrop[i][0], sizeof(glm::i16vec4));
 	}
+}
 
+void Material::LoadExtensionsAndExtras()
+{
+//copy material
+	const nlohmann::json::const_iterator extensions =  extensionsAndExtras.find("extensions");
+	if(extensions != extensionsAndExtras.end())
+	{
+		auto itr = extensions->find("KHR_materials_pbrSpecularGlossiness");
 
+		if(itr != extensions->end())
+			KHR::materials::from_json(itr->get<nlohmann::json>(), ext.pbrSpecularGlossiness);
 
+		itr = extensions->find("KHR_materials_unlit");
+
+		if(itr != extensions->end())
+			KHR::materials::from_json(itr->get<nlohmann::json>(), ext.unlit);
+
+#if KHR_SHEEN
+		itr = extensions->find("KHR_materials_sheen");
+
+		if(itr != extensions->end())
+			KHR::materials::from_json(itr->get<nlohmann::json>(), ext.sheen);
+#endif
+
+		itr = extensions->find("KHR_materials_clearcoat");
+
+		if(itr != extensions->end())
+			KHR::materials::from_json(itr->get<nlohmann::json>(), ext.clearcoat);
+	}
+
+	extensionsAndExtras.clear();
 }

@@ -1,4 +1,5 @@
 #include "image.h"
+#include "imagemanager.h"
 #include "Support/imagesupport.h"
 #include "Shaders/defaultvaos.h"
 #include "Shaders/transparencyshader.h"
@@ -257,7 +258,8 @@ void Image::UpdateChromaKey(uint32_t color_mask, uint32_t color_key)
 
 void Image::Clear()
 {
-	auto gl = m_manager->gl;
+	auto gl = m_manager->GetGL();
+
 	if(m_ownsTexture)
 		_gl glDeleteTextures(1, &m_texture);
 /*

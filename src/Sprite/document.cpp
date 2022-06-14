@@ -9,6 +9,7 @@
 #include "Shaders/gltfmetallicroughness.h"
 #include "Shaders/defaultvaos.h"
 #include "Support/packaccessor.h"
+#include "Support/unpackmemo.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <QMessageBox>
 
@@ -190,10 +191,12 @@ GLViewWidget * Document::GetViewWidget() const
 Document::Document(GLViewWidget * gl, Sprites::Document const& doc) :
 	imageManager(gl)
 {
+	UnpackMemo memo;
+
 	objects.reserve(doc.sprites.size());
 
 	for(auto &item : doc.sprites)
-		objects.push_back(UncountedWrap(new Object(gl, item, doc)));
+		objects.push_back(UncountedWrap(new Object(gl, item, doc, memo)));
 }
 
 Sprites::Document ToExportDocument()
