@@ -1,12 +1,11 @@
 #include "imagemanager.h"
 
-std::mutex     ImageManager::g_mutex;
-ImageManager * ImageManager::g_singleton;
-
-counted_ptr<ImageManager> ImageManager::Factory(GLViewWidget *gl)
+bool ImageManager::RemoveImage(Image * it)
 {
 	std::lock_guard<std::mutex> lock(g_mutex);
 
+	auto itr = loadedImages.find(m_path));
 
-
+	if(itr != loadedImages.end())
+		loadedImages.erase(itr);
 }

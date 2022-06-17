@@ -65,10 +65,10 @@ namespace IO
 	glm::i16vec4 GetCrop  (const uint8_t * data, glm::i16vec2 size, int channels, glm::i16vec4 aabb, uint32_t greenMask, uint32_t greenScreen);
 
 	CountedSizedArray<glm::i16vec4> GetSprites(uint8_t * data, uint32_t, glm::i16vec2 size, int channels);
-	CountedSizedArray<glm::i16vec4> GetCrop(uint8_t * data, uint32_t data_bytes, glm::i16vec2 size, int channels, CountedSizedArray<glm::i16vec4> sprites);
-	CountedSizedArray<glm::u16vec4> NormalizeCrop(CountedSizedArray<glm::i16vec4> sprites, glm::i16vec2 size);
+	CountedSizedArray<glm::i16vec4> GetCrop(uint8_t * data, uint32_t data_bytes, glm::i16vec2 size, int channels, ConstSizedArray<glm::i16vec4> sprites);
+	CountedSizedArray<glm::u16vec4> NormalizeCrop(ConstSizedArray<glm::i16vec4> sprites, glm::i16vec2 size);
 
-	bool CheckDynamics(std::string & error, float & size_ratio, CountedSizedArray<glm::i16vec4> A, CountedSizedArray<glm::i16vec4> B);
+	bool CheckDynamics(std::string & error, float & size_ratio, ConstSizedArray<glm::i16vec4> A, ConstSizedArray<glm::i16vec4> B);
 };
 
 

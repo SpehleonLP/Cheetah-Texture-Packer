@@ -15,6 +15,7 @@ class GLViewWidget;
 
 class ImageManager;
 class ImageTextureCoordinates;
+struct ImageKey;
 
 namespace IO { struct Image; }
 
@@ -28,7 +29,7 @@ public:
 	void Clear();
 
 	std::unique_ptr<uint8_t[]> LoadFileAsArray(uint32_t & size) const;
-	counted_ptr<ImageTextureCoordinates> m_textureCoordinates;
+	counted_ptr<ImageTextureCoordinates> m_texCoords;
 
 	bool isLoaded() const { return m_isLoaded; }
 	bool hasAlpha() const { return m_hasAlpha; }
@@ -47,7 +48,7 @@ private:
 	static std::mutex               g_mutex;
 
 	counted_ptr<ImageManager>       m_manager;
-	std::string		                m_path;
+	ImageKey						m_key;
 
 	glm::i16vec2                    m_size{0, 0};
 	uint8_t                         m_channels{0};

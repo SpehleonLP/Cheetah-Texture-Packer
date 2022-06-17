@@ -1,5 +1,6 @@
 #include "image.h"
 #include "imagemanager.h"
+#include "imagetexturecoordinates.h"
 #include "Support/imagesupport.h"
 #include "Shaders/defaultvaos.h"
 #include "Shaders/transparencyshader.h"
@@ -42,9 +43,9 @@ counted_ptr<Image> Image::Factory(ImageManager * manager, std::string const& doc
 }
 
 
-Image::Image(ImageManager * manager, std::string const& path) :
+Image::Image(counted_ptr<ImageManager> manager, std::string const& path) :
 	m_manager(manager),
-	m_path(path)
+	m_path(counted_string::Get(path))
 {
 	glDefaultVAOs::AddRef();
 	TransparencyShader::Shader.AddRef();
@@ -63,16 +64,16 @@ Image::~Image()
 	if(itr != m_manager->loadedImages.end())
 		m_manager->loadedImages.erase(itr);
 
-	glDefaultVAOs::Release(m_manager->gl);
-	TransparencyShader::Shader.Release(m_manager->gl);
-	UnlitShader::Shader.Release(m_manager->gl);
+	glDefaultVAOs::Release(m_manager->GetGL());
+	TransparencyShader::Shader.Release(m_manager->GetGL());
+	UnlitShader::Shader.Release(m_manager->GetGL());
 }
 
 std::unique_ptr<uint8_t[]> Image::LoadFileAsArray(uint32_t & size) const
 {
 	assert(m_texture != 0);
 
-	auto gl = m_manager->gl;
+	auto gl = m_manager->GetGL();
 	gl->makeCurrent();
 
 	std::unique_ptr<uint8_t[]> r;
@@ -142,11 +143,13 @@ void Image::LoadFromFile()
 	if(m_texture != 0 || m_path.empty())
 		return;
 
-	auto gl = m_manager->gl;
+	auto gl = m_manager->GetGL();
 	gl->makeCurrent();
 
 	IO::Image image;
 	m_ownsTexture = true;
+
+	CountedSizedArray<glm::i16vec4> spritesFromSheet;
 
 	{
 		auto sprite = SpriteFile::OpenSprite(m_path.c_str());
@@ -170,7 +173,7 @@ void Image::LoadFromFile()
 			m_channels = 4;
 
 			m_texture = sheet.UploadData(gl, &sprite.pointers[0], sprite.internalFormat, sprite.format, sprite.type);
-			m_sprites = sheet.BuildSprites();
+			spritesFromSheet = sheet.BuildSprites();
 		}
 	}
 
@@ -180,20 +183,7 @@ void Image::LoadFromFile()
 	}
 
 	m_hasAlpha = Qt_to_Gl::HasAlpha(image.internalFormat);
-
-	if(m_sprites.empty())
-		m_sprites    = IO::GetSprites(&image.image[0], image.bytes, image.size, m_channels);
-
-	if(m_cropped.empty())
-	{
-		m_cropped    = IO::GetCrop(&image.image[0], image.bytes, image.size, m_channels, m_sprites);
-		m_normalized = IO::NormalizeCrop(m_cropped, image.size);
-	}
-
-	if(m_cropped.merge(m_sprites))
-		m_normalizedPositions = m_normalized;
-	else
-		m_normalizedPositions = IO::NormalizeCrop(m_sprites, image.size);
+	m_texCoords = ImageTextureCoordinates::Factory(image, spritesFromSheet);
 
 #if HAVE_CHROMA_KEY
 		CropHistory hist;

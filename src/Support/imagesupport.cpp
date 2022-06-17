@@ -105,7 +105,7 @@ end:
 	return CountedSizedArray<glm::i16vec4>::FromArray(&r[0], r.size());
 }
 
-CountedSizedArray<glm::i16vec4> IO::GetCrop(uint8_t * data, uint32_t data_bytes, glm::i16vec2 size, int channels, const CountedSizedArray<glm::i16vec4> sprites)
+CountedSizedArray<glm::i16vec4> IO::GetCrop(uint8_t * data, uint32_t data_bytes, glm::i16vec2 size, int channels, ConstSizedArray<glm::i16vec4> sprites)
 {
 	assert(data_bytes >= (uint32_t) (size.x * size.y * channels));
 
@@ -121,7 +121,7 @@ CountedSizedArray<glm::i16vec4> IO::GetCrop(uint8_t * data, uint32_t data_bytes,
 	return r;
 }
 
-CountedSizedArray<glm::u16vec4> IO::NormalizeCrop(CountedSizedArray<glm::i16vec4> sprites, glm::i16vec2 size)
+CountedSizedArray<glm::u16vec4> IO::NormalizeCrop(ConstSizedArray<glm::i16vec4> sprites, glm::i16vec2 size)
 {
 	CountedSizedArray<glm::u16vec4> r(sprites.size());
 
@@ -268,7 +268,7 @@ void IO::DownloadImage(GLViewWidget * gl, IO::Image * image,  uint32_t texture, 
 }
 
 
-bool IO::CheckDynamics(std::string & error, float & size_ratio, CountedSizedArray<glm::i16vec4> A, CountedSizedArray<glm::i16vec4> B)
+bool IO::CheckDynamics(std::string & error, float & size_ratio, ConstSizedArray<glm::i16vec4> A, ConstSizedArray<glm::i16vec4> B)
 {
 	if(A == B) return true;
 

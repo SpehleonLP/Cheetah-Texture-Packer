@@ -1,4 +1,5 @@
 #include "material.h"
+#include "imagetexturecoordinates.h"
 #include "src/widgets/glviewwidget.h"
 #include "src/Support/vectoroperations.hpp"
 #include "Shaders/defaultvaos.h"
@@ -82,30 +83,33 @@ void Material::SetImage(counted_ptr<Image> image, counted_ptr<Image> * slot)
 		return;
 
 	image_slots[tex] = image;
-	m_vboFlags |= (1 << tex);
 
-	if((Tex)tex <= current_slot
-	|| current_slot == Tex::None)
+	std::vector<counted_ptr<ImageTextureCoordinates>> coords;
+
+	for(int i = 0; i < (int)Tex::Total; ++i)
 	{
-		current_slot = (Tex)tex;
+		if(image_slots[i])
+			coords.push_back(image_slots[i]->m_texCoords);
+	}
 
-		m_sprites           = image->m_sprites;
-		m_crop              = image->m_cropped;
-		m_normalizedCrop    = image->m_normalized;
-		m_normalizedSprites = image->m_normalizedPositions;
+	counted_ptr<ImageTextureCoordinates> texCoord = ImageTextureCoordinates::Factory(coords);
 
-		m_spriteCount = m_sprites.size();
-		m_sheetSize   = image->GetSize();
+	if(texCoord != m_texCoords)
+	{
 		m_dirty = true;
+		m_texCoords = texCoord;
+
+		for(int i = 0; i < (int)Tex::Total; ++i)
+		{
+			if(image_slots[i])
+			{
+				m_sheetSize   = image_slots[i]->GetSize();
+				break;
+			}
+		}
 	}
-	else if(image != nullptr)
-	{
-	//try to optimize memory
-		image->m_sprites.merge(m_sprites);
-		image->m_cropped.merge(m_crop);
-		image->m_normalized.merge(m_normalizedCrop);
-		image->m_normalizedPositions.merge(m_normalizedSprites);
-	}
+
+	m_spriteCount = m_texCoords? m_texCoords->size() : 0;
 }
 
 std::string Material::IsImageCompatible(Material::Tex tex, counted_ptr<Image> image)
@@ -120,20 +124,24 @@ std::string Material::IsImageCompatible(Material::Tex tex, counted_ptr<Image> im
 		image->LoadFromFile();
 
 	//first one so anything goes
-		if(current_slot == Tex::None)
-			return {};
-
-		if(m_sprites.size() != image->m_sprites.size())
-			return "number of sprites in image does not match number in material.";
-
-	//check compatibility...
-		if(image->m_normalizedPositions.merge(m_normalizedSprites))
+		for(int i = 0; i < (int)Tex::Total; ++i)
 		{
-			image->m_sprites.merge(m_sprites);
-			return {};
-		}
+			if(tex == (Tex)i)
+				continue;
 
-		return "sprites in image do not properly align with sprites in material.";
+			if(image_slots[i])
+			{
+				switch(image_slots[i]->m_texCoords->IsCompatible(image->m_texCoords.get()))
+				{
+				case ImageTextureCoordinates::Compatibility::CountMismatch:
+					return "number of sprites in image does not match number in material.";
+				case ImageTextureCoordinates::Compatibility::NormSizeMismatch:
+					return "sprites in image do not properly align with sprites in material.";
+				default:
+					break;
+				}
+			}
+		}
 	}
 	catch(std::exception & e)
 	{
@@ -155,6 +163,9 @@ void Material::CreateDefaultArrays(GLViewWidget* gl)
 
 	for(uint32_t i = 0; i < m_spriteCount; ++i)
 		m_spriteVertices[i] = {(uint16_t)(i*4), 4};
+
+	auto m_sprites = m_texCoords->sprites();
+	auto m_crop   = m_texCoords->sprites();
 
 	for(uint32_t i = 0; i < m_spriteCount; ++i)
 	{
@@ -284,6 +295,8 @@ void Material::Prepare(GLViewWidget* gl)
 			if(image_slots[i] == nullptr)
 				continue;
 
+			auto texCoords = image_slots[i]->m_texCoords->sprites();
+
 			std::vector<glm::vec2> coords(m_normalizedPositions.size());
 			memcpy(&coords[0], &m_normalizedPositions[0], sizeof(coords[0]) * coords.size());
 
@@ -297,7 +310,7 @@ void Material::Prepare(GLViewWidget* gl)
 
 			for(uint32_t j = 0; j < m_spriteCount; ++j)
 			{
-				glm::vec4 square = glm::vec4(image_slots[i]->m_sprites[j]) / sheet_size;
+				glm::vec4 square = glm::vec4(texCoords[j]) / sheet_size;
 				auto pair   = m_spriteVertices[j];
 
 				for(uint32_t k = 0; k < pair.length; ++k)
@@ -317,7 +330,7 @@ void Material::Prepare(GLViewWidget* gl)
 
 void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
 {
-	if(m_sprites.empty())	return;
+	if(m_texCoords == nullptr)	return;
 
 	if(isUnlit())
 	{
@@ -386,9 +399,11 @@ void Material::RenderSpriteSheet(GLViewWidget * gl, Material::Tex image_slot, in
 
 RenderData Material::GetRenderData(int frame)
 {
+	if(m_texCoords == nullptr) return {};
+
 	RenderData r;
 
-	if(frame >= 0) frame %= m_sprites.size();
+	if(frame >= 0) frame %= m_spriteCount;
 
 	r.frame       = frame;
 	r.elements    = 0;
@@ -409,10 +424,13 @@ RenderData Material::GetRenderData(int frame)
 
 void Material::RenderSheetBackdrop(GLViewWidget * gl, RenderData const& db)
 {
+	if(m_texCoords == nullptr)
+		return;
+
 	if(m_spriteSheet == nullptr)
 		m_spriteSheet.reset(new SpriteSheet());
 
-	m_spriteSheet->Prepare(gl, m_sprites, m_sheetSize);
+	m_spriteSheet->Prepare(gl, m_texCoords->sprites(), m_sheetSize);
 	m_spriteSheet->RenderSheet(gl, db);
 }
 
@@ -510,20 +528,6 @@ int Material::PackDocument(Material * This, Sprites::Document & doc, PackMemo & 
 	return material_id;
 }
 
-/* Texture coordinate packing needs to be updated for sheet packing... */
-void Material::PackFrames(Sprites::Sprite & sprite, Sprites::Document & , PackMemo & )
-{
-	assert(sprite.frames.size() == noFrames());
-
-//step 1 copy data into frames
-	for(uint32_t i = 0; i < sprite.frames.size(); ++i)
-	{
-		memcpy(&sprite.frames[i].AABB[0], &m_sprites[i][0], sizeof(glm::i16vec4));
-		memcpy(&sprite.frames[i].crop[0], &m_crop[i][0], sizeof(glm::i16vec4));
-		memcpy(&sprite.frames[i].texCoord0[0], &m_normalizedCrop[i][0], sizeof(glm::i16vec4));
-		memcpy(&sprite.frames[i].texCoord1[0], &m_normalizedCrop[i][0], sizeof(glm::i16vec4));
-	}
-}
 
 void Material::LoadExtensionsAndExtras()
 {

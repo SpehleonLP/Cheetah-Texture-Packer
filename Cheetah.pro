@@ -58,6 +58,7 @@ SOURCES += src/main.cpp\
 	src/Sprite/spritejson.cpp \
 	src/Sprite/spritesheet.cpp \
 	src/Support/counted_string.cpp \
+	src/Support/getuniquecountedarray.cpp \
 	src/Support/imagesupport.cpp \
 	src/Support/packaccessor.cpp \
 	src/Support/qt_to_gl.cpp \
@@ -116,6 +117,7 @@ HEADERS  += src/mainwindow.h \
 	src/Support/counted_ptr.hpp \
 	src/Support/counted_string.h \
 	src/Support/countedsizedarray.hpp \
+	src/Support/getuniquecountedarray.h \
 	src/Support/glm_iostream.hpp \
 	src/Support/imagesupport.h \
 	src/Support/packaccessor.h \

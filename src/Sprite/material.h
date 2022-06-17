@@ -87,8 +87,8 @@ public:
 	MaterialExtensions ext;
 
 	counted_ptr<Image>                    image_slots[(int)Tex::Total];
-	Material::Tex                         current_slot{Tex::None};
 	int8_t                                tex_coords[(int)Tex::Total];
+	counted_ptr<ImageTextureCoordinates>  m_texCoords;
 
 	void Clear(GLViewWidget * gl);
 
@@ -123,8 +123,6 @@ public:
 		return x;
 	}
 
-	void PackFrames(Sprites::Sprite & sprite, Sprites::Document & doc, PackMemo & mapping);
-
 	uint32_t noFrames() const  { return m_spriteCount; }
 
 	void Prepare(GLViewWidget*);
@@ -146,11 +144,7 @@ private:
 		uint16_t end() const { return start+length; }
 	};
 
-	bool                            m_dirty{true};
-	CountedSizedArray<glm::i16vec4> m_sprites{};
-	CountedSizedArray<glm::i16vec4> m_crop{};
-	CountedSizedArray<glm::u16vec4> m_normalizedCrop{};
-	CountedSizedArray<glm::u16vec4> m_normalizedSprites{};
+	bool								 m_dirty{true};
 
 //made in render
 	std::unique_ptr<SpriteSheet>    m_spriteSheet;

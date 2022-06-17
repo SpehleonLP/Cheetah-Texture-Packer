@@ -54,7 +54,7 @@ inline void PushSprite(std::vector<vertex> & vec, glm::i16vec4 item, uint32_t id
 }
 
 
-void SpriteSheet::Prepare(GLViewWidget* gl, CountedSizedArray<glm::i16vec4> & sprites, glm::i16vec2 sheet_size)
+void SpriteSheet::Prepare(GLViewWidget* gl, ConstSizedArray<glm::i16vec4> const& sprites, glm::i16vec2 sheet_size)
 {
 	GL_ASSERT;
 
