@@ -1,4 +1,7 @@
 #include "unpackmemo.h"
+#include "gltf_stl_accessor.h"
+#include "Support/getuniquecountedarray.h"
+#include "Sprite/imagetexturecoordinates.h"
 
 UnpackMemo::UnpackMemo() {}
 UnpackMemo::~UnpackMemo() {}
@@ -14,36 +17,57 @@ counted_ptr<Image> UnpackMemo::UnpackImage(GLViewWidget * gl, Sprites::Sprite co
 
 }
 
-void UnpackMemo::UpdateFrames(Sprites::Sprite const& spr)
+
+counted_ptr<ImageTextureCoordinates> UnpackMemo::GetTexCoords(Sprites::Document const& doc, int i)
 {
-	static_assert(sizeof(aabb[0]) == sizeof(Sprites::Sprite::Frame::AABB));
-	static_assert(sizeof(crop[0]) == sizeof(Sprites::Sprite::Frame::crop));
-	static_assert(sizeof(texCoord0[0]) == sizeof(Sprites::Sprite::Frame::texCoord0));
-	static_assert(sizeof(texCoord1[0]) == sizeof(Sprites::Sprite::Frame::texCoord1));
+	if(m_texCoords.size() != doc.texCoords.size())
+		m_texCoords.resize(doc.texCoords.size());
 
-	if(current == &spr)
-		return;
+	if((uint32_t)i < m_texCoords.size() && !m_texCoords[i].empty())
+		return m_texCoords[i];
 
-	current = &spr;
-
-	aabb		= CountedSizedArray<glm::i16vec4>(spr.frames.size());
-	crop		= CountedSizedArray<glm::i16vec4>(spr.frames.size());
-	texCoord0	= CountedSizedArray<glm::u16vec4>(spr.frames.size());
-	texCoord1	= CountedSizedArray<glm::u16vec4>(spr.frames.size());
-
-	for(uint32_t i = 0; i < spr.frames.size(); ++i)
-	{
-		memcpy(&aabb[i][0], &spr.frames[i].AABB[0], sizeof(aabb[0]));
-		memcpy(&crop[i][0], &spr.frames[i].crop[0], sizeof(crop[0]));
-		memcpy(&texCoord0[i][0], &spr.frames[i].texCoord0[0], sizeof(texCoord0[0]));
-		memcpy(&texCoord1[i][0], &spr.frames[i].texCoord1[0], sizeof(texCoord1[0]));
-	}
-
-	aabb	  = MakeUnique(aabb);
-	crop	  = MakeUnique(crop);
-	texCoord0 = MakeUnique(texCoord0);
-	texCoord1 = MakeUnique(texCoord1);
-
-
-
+	return (m_texCoords[i] = ImageTextureCoordinates::Factory(doc, i, *this));
 }
+
+template<int n, typename T, glm::qualifier Q>
+ConstSizedArray<glm::vec<n, T, Q>>  LoadAccessorArray(Sprites::Document const& doc, uint32_t i, glm::vec<n, T, Q>)
+{
+	fx::gltf::stdAccessor<T, n, glm::vec<n, T, Q> > accessor(doc, i);
+
+	CountedSizedArray<glm::vec<n, T, Q>> r(accessor.size());
+
+	for(auto i = 0u; i < r.size(); ++i)
+		r[i] = accessor[i];
+
+	return r;
+}
+
+template<typename T>
+ConstSizedArray<T> UnpackMemo::GetAccessor(Sprites::Document const& doc, int i, std::vector<ConstSizedArray<T>> UnpackMemo::*array)
+{
+	if(i < 0) return {};
+
+	if((this->*array).size() != doc.accessors.size())
+		(this->*array).resize(doc.accessors.size());
+
+	if((uint32_t)i < (this->*array).size() && !(this->*array)[i].empty())
+		return (this->*array)[i];
+
+	return ((this->*array)[i] = MakeUnique(LoadAccessorArray(doc, i, T())));
+}
+
+ConstSizedArray<glm::i16vec4> UnpackMemo::GetAccessor_i16vec4(Sprites::Document const& doc, int i)
+{
+	return GetAccessor<glm::i16vec4>(doc, i, &UnpackMemo::m_i16vec4Accessors);
+}
+
+ConstSizedArray<glm::u16vec4> UnpackMemo::GetAccessor_u16vec4(Sprites::Document const& doc, int i)
+{
+	return GetAccessor<glm::u16vec4>(doc, i, &UnpackMemo::m_u16vec4Accessors);
+}
+
+ConstSizedArray<glm::i16vec2> UnpackMemo::GetAccessor_i16vec2(Sprites::Document const& doc, int i)
+{
+	return GetAccessor<glm::i16vec2>(doc, i, &UnpackMemo::m_i16vec2Accessors);
+}
+

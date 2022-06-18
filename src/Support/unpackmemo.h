@@ -17,8 +17,15 @@
 
 struct UnpackMemo
 {
+typedef counted_ptr<ImageTextureCoordinates> TexCoords;
+
 	UnpackMemo();
 	~UnpackMemo();
+
+	ConstSizedArray<glm::i16vec4> GetAccessor_i16vec4(Sprites::Document const& doc, int i);
+	ConstSizedArray<glm::i16vec2> GetAccessor_i16vec2(Sprites::Document const& doc, int i);
+	ConstSizedArray<glm::u16vec4> GetAccessor_u16vec4(Sprites::Document const& doc, int i);
+	counted_ptr<ImageTextureCoordinates> GetTexCoords(Sprites::Document const& doc, int i);
 
 	counted_ptr<Image> UnpackImage(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, fx::gltf::Material::Texture const& texture);
 
@@ -27,6 +34,9 @@ struct UnpackMemo
 
 private:
 	void UpdateFrames(Sprites::Sprite const& spr);
+
+	template<typename T>
+	ConstSizedArray<T> GetAccessor(Sprites::Document const& doc, int i, std::vector<ConstSizedArray<T>> UnpackMemo::*array);
 
 //current accessors
 	Sprites::Sprite const* current{};
@@ -37,34 +47,10 @@ private:
 	CountedSizedArray<glm::u16vec4> texCoord1;
 
 //previously loaded accessors
-	std::vector<CountedSizedArray<glm::i16vec4>> m_i16vec4Accessors;
-	std::vector<CountedSizedArray<glm::u16vec4>> m_u16vec4Accessors;
-
-	CountedSizedArray<glm::u16vec4> MakeUnique(CountedSizedArray<glm::u16vec4> const& in)
-	{
-		for(auto i = 0u; i < m_u16vec4Accessors.size(); ++i)
-		{
-			if(m_u16vec4Accessors[i].CanMerge(in))
-			{
-				return m_u16vec4Accessors[i];
-			}
-		}
-
-		return in;
-	}
-
-	CountedSizedArray<glm::i16vec4> MakeUnique(CountedSizedArray<glm::i16vec4> const& in)
-	{
-		for(auto i = 0u; i < m_i16vec4Accessors.size(); ++i)
-		{
-			if(m_i16vec4Accessors[i].CanMerge(in))
-			{
-				return m_i16vec4Accessors[i];
-			}
-		}
-
-		return in;
-	}
+	std::vector<ConstSizedArray<glm::i16vec4>> m_i16vec4Accessors;
+	std::vector<ConstSizedArray<glm::i16vec2>> m_i16vec2Accessors;
+	std::vector<ConstSizedArray<glm::u16vec4>> m_u16vec4Accessors;
+	std::vector<TexCoords>					   m_texCoords;
 };
 
 #endif // UNPACKMEMO_H

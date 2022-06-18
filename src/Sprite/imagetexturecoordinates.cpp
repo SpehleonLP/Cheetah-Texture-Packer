@@ -2,9 +2,20 @@
 #include "Support/imagesupport.h"
 #include "Support/getuniquecountedarray.h"
 #include "Support/qt_to_gl.h"
+#include "Support/unpackmemo.h"
 #include <mutex>
 
 std::vector<counted_ptr<ImageTextureCoordinates>> ImageTextureCoordinates::g_database;
+
+counted_ptr<ImageTextureCoordinates> ImageTextureCoordinates::Factory(Sprites::Document const& doc, int i, UnpackMemo & memo)
+{
+	return Factory(
+		memo.GetAccessor_i16vec4(doc, doc.texCoords[i].sprites),
+		memo.GetAccessor_i16vec4(doc, doc.texCoords[i].cropped),
+		memo.GetAccessor_u16vec4(doc, doc.texCoords[i].normalizedSprites),
+		memo.GetAccessor_u16vec4(doc, doc.texCoords[i].normalizedCrop));
+}
+
 
 counted_ptr<ImageTextureCoordinates> ImageTextureCoordinates::Factory(IO::Image const& image, i16vec4array sprites)
 {
@@ -17,7 +28,7 @@ counted_ptr<ImageTextureCoordinates> ImageTextureCoordinates::Factory(IO::Image 
 	if(sprites.empty())
 		sprites    = IO::GetSprites(&image.image[0], image.bytes, image.size, channels);
 
-	cropped    = IO::GetCrop(&image.image[0], image.bytes, image.size, channels, m_sprites);
+	cropped    = IO::GetCrop(&image.image[0], image.bytes, image.size, channels, sprites);
 	normalized = IO::NormalizeCrop(cropped, image.size);
 
 	normalizedPositions = IO::NormalizeCrop(sprites, image.size);

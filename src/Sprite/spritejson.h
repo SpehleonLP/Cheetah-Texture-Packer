@@ -60,24 +60,32 @@ struct Animation
 	nlohmann::json extensionsAndExtras{};
 };
 
+struct TexCoords
+{
+	int32_t sprites{-1};
+	int32_t cropped{-1};
+	int32_t normalizedSprites{-1};
+	int32_t normalizedCrop{-1};
+};
+
 struct Sprite : NeverEmpty
 {
 	struct Frame : NeverEmpty
 	{
-		std::vector<std::array<short, 2>> attachments;
+		int32_t					 attachments{-1};
 
 //original position on the sprite sheet
-		std::array<uint16_t, 4>           AABB;
-		std::array<uint16_t, 4>           crop;
-		std::array<uint16_t, 4>           texCoord0;
-		std::array<uint16_t, 4>           texCoord1;
+		int32_t					 AABB{-1};
+		int32_t					 crop{-1};
+		int32_t					 texCoord0{-1};
+		int32_t					 texCoord1{-1};
 	};
 
 	std::string              name;
 
 	int32_t                  material{-1};
 
-	std::vector<Frame>       frames;
+	Frame			         frames;
 	std::vector<std::string> attachments;
 	std::vector<Animation>   animations;
 
@@ -90,6 +98,7 @@ struct Document : public fx::gltf::DocumentBase
 
 	std::vector<Sprite>     sprites{};
 	std::vector<Material>   materials{};
+	std::vector<TexCoords>  texCoords{};
 
 	std::vector<std::string> extensionsUsed{};
 	std::vector<std::string> extensionsRequired{};

@@ -4,7 +4,7 @@
 
 #define ReadRequiredField fx::gltf::detail::ReadRequiredField
 #define ReadOptionalField fx::gltf::detail::ReadOptionalField
-#define WriteField        fx::gltf::detail::WriteField
+#define WriteQuick        fx::gltf::detail::WriteField
 #define WriteRequiredField fx::gltf::detail::WriteRequiredField
 
 namespace fx {
@@ -66,11 +66,27 @@ inline void from_json(nlohmann::json const & json, Animation & db)
 
 inline void to_json(nlohmann::json & json, Animation const& db)
 {
-	WriteField("name",   json, db.name);
-	WriteField("frames", json, db.frames);
-	WriteField("fps",    json, db.fps, 29.97f);
+	WriteQuick("name",   json, db.name);
+	WriteQuick("frames", json, db.frames);
+	WriteQuick("fps",    json, db.fps, 29.97f);
 
 	detail::WriteExtensions(json, db.extensionsAndExtras);
+}
+
+inline void from_json(nlohmann::json const & json, TexCoords & db)
+{
+	ReadRequiredField("sprites",			json, db.sprites);
+	ReadRequiredField("cropped",			json, db.cropped);
+	ReadRequiredField("normalizedSprites",  json, db.normalizedSprites);
+	ReadRequiredField("normalizedCrop",		json, db.normalizedCrop);
+}
+
+inline void to_json(nlohmann::json & json, TexCoords const& db)
+{
+	WriteRequiredField("sprites",			 json, db.sprites);
+	WriteRequiredField("cropped",			 json, db.cropped);
+	WriteRequiredField("normalizedSprites",  json, db.normalizedSprites);
+	WriteRequiredField("normalizedCrop",	 json, db.normalizedCrop);
 }
 
 inline void from_json(nlohmann::json const & json, Sprite::Frame & db)
@@ -84,7 +100,7 @@ inline void from_json(nlohmann::json const & json, Sprite::Frame & db)
 
 inline void to_json(nlohmann::json & json, Sprite::Frame const& db)
 {
-	WriteField("attachments", json, db.attachments);
+	fx::gltf::detail::WriteField("attachments", json, db.attachments, -1);
 	WriteRequiredField("AABB",        json, db.AABB);
 	WriteRequiredField("crop",        json, db.crop);
 	WriteRequiredField("texCoord0",   json, db.texCoord0);
@@ -106,13 +122,13 @@ inline void from_json(nlohmann::json const & json, Sprite & db)
 
 void to_json(nlohmann::json & json, Sprite const& db)
 {
-	WriteField("name",         json, db.name);
-	WriteField("material",     json, db.material, -1);
+	WriteQuick("name",         json, db.name);
+	WriteQuick("material",     json, db.material, -1);
 
-	WriteField("frames",       json, db.frames);
+	WriteQuick("frames",       json, db.frames);
 
-	WriteField("attachments",  json, db.attachments);
-	WriteField("animations",   json, db.animations);
+	WriteQuick("attachments",  json, db.attachments);
+	WriteQuick("animations",   json, db.animations);
 
 	detail::WriteExtensions(json, db.extensionsAndExtras);
 }
@@ -139,20 +155,22 @@ void from_json(nlohmann::json const & json, Document & db)
 
 void to_json(nlohmann::json & json, Document const& db)
 {
-	WriteField("asset",          json, db.asset);
-	WriteField("sprites",        json, db.sprites);
+	WriteQuick("asset",          json, db.asset);
+	WriteQuick("sprites",        json, db.sprites);
 
-	WriteField("accessors",      json, db.accessors);
-	WriteField("buffers",        json, db.buffers);
-	WriteField("bufferViews",    json, db.bufferViews);
+	WriteQuick("accessors",      json, db.accessors);
+	WriteQuick("buffers",        json, db.buffers);
+	WriteQuick("bufferViews",    json, db.bufferViews);
 
-	WriteField("materials",      json, db.materials);
-	WriteField("textures",       json, db.textures);
-	WriteField("images",         json, db.images);
-	WriteField("samplers",       json, db.samplers);
+	WriteQuick("materials",      json, db.materials);
+	WriteQuick("textures",       json, db.textures);
+	WriteQuick("images",         json, db.images);
+	WriteQuick("samplers",       json, db.samplers);
 
-	WriteField("extensionsUsed", json, db.extensionsUsed);
-	WriteField("extensionsRequired", json, db.extensionsRequired);
+	WriteQuick("texCoords",      json, db.texCoords);
+
+	WriteQuick("extensionsUsed", json, db.extensionsUsed);
+	WriteQuick("extensionsRequired", json, db.extensionsRequired);
 
 	detail::WriteExtensions(json, db.extensionsAndExtras);
 }

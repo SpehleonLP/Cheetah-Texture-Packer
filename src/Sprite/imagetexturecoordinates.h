@@ -4,6 +4,10 @@
 #include <glm/gtc/type_precision.hpp>
 
 namespace IO { struct Image; }
+namespace Sprites { struct Document; }
+
+struct UnpackMemo;
+struct PackMemo;
 
 class ImageTextureCoordinates
 {
@@ -17,6 +21,7 @@ typedef ConstSizedArray<glm::u16vec4> u16vec4array;
 		NormSizeMismatch
 	};
 
+	static counted_ptr<ImageTextureCoordinates> Factory(Sprites::Document const& doc, int texCoordId, UnpackMemo & memo);
 	static counted_ptr<ImageTextureCoordinates> Factory(IO::Image const& image, i16vec4array sprites = {});
 	static counted_ptr<ImageTextureCoordinates> Factory(std::vector<counted_ptr<ImageTextureCoordinates>> const&);
 
