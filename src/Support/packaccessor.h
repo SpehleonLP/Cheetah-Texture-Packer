@@ -25,13 +25,27 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 	template<int S, typename T, glm::qualifier Q>
 	int32_t PackAccessor(glm::vec<S, T, Q> * array, uint32_t length, bool normalize, bool take_memory)
 	{
+		auto itr = m_knownAccessors.find(array);
+
+		if(itr != m_knownAccessors.end())
+			return itr->second;
+
 		static_assert(ComponentTypeId<T>::ComponentType != 0, "unidentified component type");
 
-		return PackAccessor(
+		auto value = PackAccessor(
 			(void*)array, length,
 			(ComponentType)ComponentTypeId<T>::ComponentType,
 			(Type)S,
 			normalize, take_memory);
+
+		itr[array] = value;
+		return value;
+	}
+
+	template<typename T>
+	int32_t PackAccessor(ConstSizedArray<T> const& array, bool normalize = false)
+	{
+		return PackAccessor(array.data(), array.size(), normalize, false);
 	}
 
 	int32_t PackAccessor(void * array, uint32_t length, ComponentType, Type, bool normalize, bool take_memory);
@@ -76,8 +90,29 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 
 	std::unordered_map<void*, int32_t> mapping;
 
+	int32_t GetId(void const* ptr) const
+	{
+		auto itr = m_knownAccessors.find(ptr);
+
+		if(itr != m_knownAccessors.end())
+			return itr->second;
+
+		return -1;
+	}
+
+	bool	SetId(void const* ptr, int32_t id)
+	{
+		if(GetId(ptr) >= 0)
+			return false;
+
+		m_knownAccessors[ptr] = id;
+		return true;
+	}
+
 private:
 	void GetMinMax(AccessorMemo const& memo, std::vector<float> & min, std::vector<float> & max);
+
+	std::map<void const*, int>	m_knownAccessors;
 
 	std::vector<BufferViewMemo> m_memo;
 	std::vector<AccessorMemo>   m_accessors;

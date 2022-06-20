@@ -3,6 +3,7 @@
 #include "Support/getuniquecountedarray.h"
 #include "Support/qt_to_gl.h"
 #include "Support/unpackmemo.h"
+#include "Support/packaccessor.h"
 #include <mutex>
 
 std::vector<counted_ptr<ImageTextureCoordinates>> ImageTextureCoordinates::g_database;
@@ -55,11 +56,33 @@ counted_ptr<ImageTextureCoordinates> ImageTextureCoordinates::Factory(i16vec4arr
 ImageTextureCoordinates::ImageTextureCoordinates(i16vec4array const& sprites, i16vec4array const& crop, u16vec4array const& normalized, u16vec4array const& positions) :
 	m_sprites(sprites),
 	m_cropped(crop),
-	m_normalized(normalized),
-	m_normalizedPositions(positions)
+	m_normalizedSprites(positions),
+	m_normalizedCrop(normalized)
 {
 }
 
 ImageTextureCoordinates::~ImageTextureCoordinates()
 {
+}
+
+int32_t ImageTextureCoordinates::Pack(Sprites::Document & doc, PackMemo & memo) const
+{
+	int32_t id = memo.GetId(this);
+
+	if(id >= 0)
+		return id;
+
+	id = doc.texCoords.size();
+	memo.SetId(this, id);
+
+	Sprites::TexCoords buffer;
+
+	buffer. sprites				= memo.PackAccessor(m_sprites);
+	buffer. cropped				= memo.PackAccessor(m_cropped);
+	buffer. normalizedSprites	= memo.PackAccessor(m_normalizedSprites, true);
+	buffer. normalizedCrop		= memo.PackAccessor(m_normalizedCrop, true);
+
+	doc.texCoords.push_back(buffer);
+	return id;
+
 }
