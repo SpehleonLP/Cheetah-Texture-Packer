@@ -25,7 +25,7 @@ LIBS += -lGLEW -lGL -lGLU -ldrm
 
 CONFIG += c++14
 
-DEFINES += QT_DEPRECATED_WARNINGS GLM_EXT_INCLUDED \"_gl=gl->\"
+DEFINES += CHEETAH=1 QT_DEPRECATED_WARNINGS GLM_EXT_INCLUDED \"_gl=gl->\"
 
 SOURCES += src/main.cpp\
 	../../../Libraries/fx-gltf/src/bufferinfo.cpp \
@@ -51,6 +51,7 @@ SOURCES += src/main.cpp\
 	src/Sprite/countedgltfimage.cpp \
 	src/Sprite/document.cpp \
 	src/Sprite/image.cpp \
+	src/Sprite/imagekey.cpp \
 	src/Sprite/imagemanager.cpp \
 	src/Sprite/imagetexturecoordinates.cpp \
 	src/Sprite/material.cpp \
@@ -108,6 +109,7 @@ HEADERS  += src/mainwindow.h \
 	src/Sprite/countedgltfimage.h \
 	src/Sprite/document.h \
 	src/Sprite/image.h \
+	src/Sprite/imagekey.h \
 	src/Sprite/imagemanager.h \
 	src/Sprite/imagetexturecoordinates.h \
 	src/Sprite/material.h \

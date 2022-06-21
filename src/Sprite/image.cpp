@@ -22,30 +22,42 @@
 
 #undef LoadImage
 
-std::mutex                       Image::g_mutex;
-
-counted_ptr<Image> Image::Factory(ImageManager * manager, std::string const& documentFilePath)
+counted_ptr<Image> Image::Factory(counted_ptr<ImageManager> manager, std::string const& documentFilePath)
 {
 	if(documentFilePath.empty())
 		return nullptr;
 
-	counted_string path      = counted_string::MakeShared(documentFilePath);
+	return manager->GetImage(ImageKey(documentFilePath));
+}
 
-	std::lock_guard<std::mutex> lock(g_mutex);
+Image::Image(counted_ptr<ImageManager> manager, const ImageKey & key, IO::Image && image, counted_ptr<ImageTextureCoordinates> && texCoords) :
+	m_texCoords(texCoords),
+	m_manager(manager),
+	m_key(key)
+{
+	glDefaultVAOs::AddRef();
+	TransparencyShader::Shader.AddRef();
+	UnlitShader::Shader.AddRef();
 
-	auto itr = manager->loadedImages.find(path);
-	if(itr != manager->loadedImages.end())
-		return CountedWrap(itr->second);
+	m_ownsTexture = true;
+	m_size      = image.size;
+	m_channels  = Qt_to_Gl::GetChannelsFromFormat(image.format);
+	m_hasAlpha = Qt_to_Gl::HasAlpha(image.internalFormat);
 
-	auto ptr = UncountedWrap(new Image(manager, documentFilePath));
-	manager->loadedImages.emplace(path, ptr.get());
-	return ptr;
+	IO::UploadImage(manager->GetGL(), &m_texture, &image.image[0], image.size, image.internalFormat, image.format, image.type);
+
+	if(image.type != GL_UNSIGNED_BYTE)
+	{
+		IO::DownloadImage(manager->GetGL(), &image, m_texture, -1, -1, GL_UNSIGNED_BYTE);
+	}
+
+	m_texCoords = ImageTextureCoordinates::Factory(image, {});
 }
 
 
-Image::Image(counted_ptr<ImageManager> manager, std::string const& path) :
+Image::Image(counted_ptr<ImageManager> manager, ImageKey const& key) :
 	m_manager(manager),
-	m_path(counted_string::Get(path))
+	m_key(key)
 {
 	glDefaultVAOs::AddRef();
 	TransparencyShader::Shader.AddRef();
@@ -57,16 +69,22 @@ Image::Image(counted_ptr<ImageManager> manager, std::string const& path) :
 
 Image::~Image()
 {
-	std::lock_guard<std::mutex> lock(g_mutex);
-
-	auto itr = m_manager->loadedImages.find(counted_string::Get(m_path));
-
-	if(itr != m_manager->loadedImages.end())
-		m_manager->loadedImages.erase(itr);
+	Clear();
 
 	glDefaultVAOs::Release(m_manager->GetGL());
 	TransparencyShader::Shader.Release(m_manager->GetGL());
 	UnlitShader::Shader.Release(m_manager->GetGL());
+}
+
+bool Image::Destroy()
+{
+	if(m_manager->RemoveImage(*this) == true)
+	{
+		delete this;
+		return true;
+	}
+
+	return false;
 }
 
 std::unique_ptr<uint8_t[]> Image::LoadFileAsArray(uint32_t & size) const
@@ -110,37 +128,9 @@ std::unique_ptr<uint8_t[]> Image::LoadFileAsArray(uint32_t & size) const
 	return r;
 }*/
 
-std::string Image::getFilename() const
-{
-	const std::size_t slash_pos = m_path.find_last_of("/\\");
-	const std::size_t period_pos = m_path.find_last_of(".");
-
-	if(period_pos != std::string::npos
-	&& slash_pos != std::string::npos)
-		return m_path.substr(slash_pos+1, period_pos-(slash_pos+1));
-
-	return {};
-}
-
-std::string Image::getDirectory() const
-{
-	const std::size_t pos = m_path.find_last_of("/\\");
-	if (pos != std::string::npos)
-	{
-		return m_path.substr(0, pos);
-	}
-
-	return {};
-}
-
-std::string Image::getMimeType() const
-{
-	return IO::MimeType(m_path.c_str());
-}
-
 void Image::LoadFromFile()
 {
-	if(m_texture != 0 || m_path.empty())
+	if(m_texture != 0 || m_key.empty())
 		return;
 
 	auto gl = m_manager->GetGL();
@@ -152,11 +142,11 @@ void Image::LoadFromFile()
 	CountedSizedArray<glm::i16vec4> spritesFromSheet;
 
 	{
-		auto sprite = SpriteFile::OpenSprite(m_path.c_str());
+		auto sprite = SpriteFile::OpenSprite(m_key.path.c_str());
 
 		if(sprite.empty())
 		{
-			image       = IO::LoadImage(m_path.c_str());
+			image       = IO::LoadImage(m_key.path.c_str());
 			m_size      = image.size;
 			m_channels  = Qt_to_Gl::GetChannelsFromFormat(image.format);
 
@@ -197,7 +187,6 @@ void Image::LoadFromFile()
 
 	gl->doneCurrent();
 }
-
 
 #if HAVE_CHROMA_KEY
 void Image::UpdateChromaKey(uint32_t color_mask, uint32_t color_key)

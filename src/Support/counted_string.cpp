@@ -211,3 +211,102 @@ void counted_string::swap(counted_string & it)
 	m_string     = it.m_string;
 	it.m_string  = str;
 }
+
+std::string counted_string::substr(size_t pos, size_t len) const
+{
+	if(pos > size())
+		throw std::out_of_range("pos");
+
+	len = std::min(size(), std::max(len, pos+len)) - pos;
+
+	return std::string(c_str(), len);
+}
+
+
+size_t counted_string::find_first_of	 (const char* s, size_t pos, size_t len) const
+{
+	if(pos > size())
+		return npos;
+
+	len = std::min(size(), std::max(len, pos+len));
+
+	const char * itr = c_str() + pos;
+	const char * end = c_str() + len;
+
+	for(; itr < end; ++itr)
+	{
+		for(const char * p = s; *p != 0; ++p)
+		{
+			if(*itr == *p)
+				return itr - c_str();
+		}
+	}
+
+	return npos;
+}
+
+size_t counted_string::find_first_not_of (const char* s, size_t pos, size_t len) const
+{
+	if(pos > size())
+		return npos;
+
+	len = std::min(size(), std::max(len, pos+len));
+
+	const char * itr = c_str() + pos;
+	const char * end = c_str() + len;
+
+	for(; itr < end; ++itr)
+	{
+		for(const char * p = s; *p != 0; ++p)
+		{
+			if(*itr != *p)
+				return itr - c_str();
+		}
+	}
+
+	return npos;
+}
+
+size_t counted_string::find_last_of		 (const char* s, size_t pos, size_t len) const
+{
+	if(pos > size())
+		return npos;
+
+	len = std::min(size(), std::max(len, pos+len));
+
+	const char * end = c_str() + pos;
+	const char * itr = c_str() + len-1;
+
+	for(; itr >= end; --itr)
+	{
+		for(const char * p = s; *p != 0; ++p)
+		{
+			if(*itr == *p)
+				return itr - c_str();
+		}
+	}
+
+	return npos;
+}
+
+size_t counted_string::find_last_not_of  (const char* s, size_t pos, size_t len) const
+{
+	if(pos > size())
+		return npos;
+
+	len = std::min(size(), std::max(len, pos+len));
+
+	const char * end = c_str() + pos;
+	const char * itr = c_str() + len-1;
+
+	for(; itr >= end; --itr)
+	{
+		for(const char * p = s; *p != 0; ++p)
+		{
+			if(*itr != *p)
+				return itr - c_str();
+		}
+	}
+
+	return npos;
+}

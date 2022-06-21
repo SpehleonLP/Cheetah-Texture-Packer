@@ -34,7 +34,7 @@ typedef ConstSizedArray<glm::u16vec4> u16vec4array;
 
 	i16vec4array sprites() const { return m_sprites; };
 	i16vec4array cropped() const { return m_cropped; };
-	u16vec4array normalized() const { return m_normalizedCrop; };
+	u16vec4array normalizedCrop() const { return m_normalizedCrop; };
 	u16vec4array normalizedPositions() const { return m_normalizedSprites; };
 
 	bool operator==(ImageTextureCoordinates const& it) const
@@ -50,8 +50,8 @@ typedef ConstSizedArray<glm::u16vec4> u16vec4array;
 		if(it->size() != size())
 			return CountMismatch;
 
-		if(m_normalizedSprites != it->m_normalizedSprites)
-			return NormSizeMismatch;
+	//	if(m_normalizedSprites != it->m_normalizedSprites)
+	//		return NormSizeMismatch;
 
 		return None;
 	}

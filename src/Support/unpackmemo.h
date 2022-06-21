@@ -19,7 +19,7 @@ struct UnpackMemo
 {
 typedef counted_ptr<ImageTextureCoordinates> TexCoords;
 
-	UnpackMemo();
+	UnpackMemo(const std::string & documentFilePath);
 	~UnpackMemo();
 
 	ConstSizedArray<glm::i16vec4> GetAccessor_i16vec4(Sprites::Document const& doc, int i);
@@ -27,24 +27,15 @@ typedef counted_ptr<ImageTextureCoordinates> TexCoords;
 	ConstSizedArray<glm::u16vec4> GetAccessor_u16vec4(Sprites::Document const& doc, int i);
 	counted_ptr<ImageTextureCoordinates> GetTexCoords(Sprites::Document const& doc, int i);
 
-	counted_ptr<Image> UnpackImage(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, fx::gltf::Material::Texture const& texture);
+	counted_ptr<Image> UnpackImage(ImageManager * gl, UnpackMemo & memo, Sprites::Document const& doc, fx::gltf::Material::Texture const& texture);
 
-	std::vector<counted_ptr<Image>> image_memo;
-
+	const std::string documentFilePath;
 
 private:
-	void UpdateFrames(Sprites::Sprite const& spr);
 
 	template<typename T>
 	ConstSizedArray<T> GetAccessor(Sprites::Document const& doc, int i, std::vector<ConstSizedArray<T>> UnpackMemo::*array);
 
-//current accessors
-	Sprites::Sprite const* current{};
-
-	CountedSizedArray<glm::i16vec4> aabb;
-	CountedSizedArray<glm::i16vec4> crop;
-	CountedSizedArray<glm::u16vec4> texCoord0;
-	CountedSizedArray<glm::u16vec4> texCoord1;
 
 //previously loaded accessors
 	std::vector<ConstSizedArray<glm::i16vec4>> m_i16vec4Accessors;

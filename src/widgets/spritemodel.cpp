@@ -735,7 +735,7 @@ typedef fx::gltf::Material::AlphaMode AlphaMode;
 
 		try
 		{
-			auto image = Image::Factory(&doc->imageManager, path);
+			auto image = Image::Factory(doc->imageManager, path);
 
 			if(image)
 			{

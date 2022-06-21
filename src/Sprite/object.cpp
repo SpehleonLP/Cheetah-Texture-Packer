@@ -1,6 +1,8 @@
 #include "object.h"
 #include "document.h"
 #include "Support/imagesupport.h"
+#include "Support/packaccessor.h"
+#include "Support/unpackmemo.h"
 #include "Sprite/spritejson.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,8 +19,8 @@ void Object::RenderAttachments(GLViewWidget *, int )
 
 }
 
-Object::Object(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo) :
-	gl(gl)
+Object::Object(ImageManager * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo) :
+	gl(gl->GetGL())
 {
 	name = counted_string::MakeShared(spr.name);
 
@@ -45,18 +47,24 @@ Object::Object(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document 
 //copy attachments
 	attachments.resize(spr.attachments.size());
 
-	for(uint32_t i = 0; i < attachments.size(); ++i)
-	{
-		attachments[i].name = counted_string::MakeShared(spr.attachments[i]);
-		attachments[i].dirty = true;
+	auto att_data = memo.GetAccessor_i16vec2(doc, spr.frames.attachments);
 
-		attachments[i].coords.reserve(spr.frames.size());
-		for(uint32_t j = 0; j < spr.frames.size(); ++j)
-			attachments[i].coords.push_back({spr.frames[j].attachments[i][0], spr.frames[j].attachments[i][1]});
+	for(uint32_t point = 0; point < attachments.size(); ++point)
+	{
+		attachments[point].name = counted_string::MakeShared(spr.attachments[point]);
+		attachments[point].dirty = true;
+
+		attachments[point].coords.resize(spr.frames.count);
+
+		for(uint32_t frame = 0; frame < attachments[frame].coords.size(); ++frame)
+			attachments[point].coords[frame] = att_data[frame * attachments.size() + point];
 	}
 
 	material.reset(new Material(gl, spr, doc, memo));
 }
+
+Object::Object(GLViewWidget * gl) : gl(gl) {}
+Object::~Object() { material->Clear(gl); }
 
 
 int Object::PackDocument(Sprites::Document & doc, PackMemo & memo)
@@ -65,12 +73,16 @@ int Object::PackDocument(Sprites::Document & doc, PackMemo & memo)
 
 	Sprites::Sprite sprite;
 
+	glm::ivec4 frame{-1};
+
 	sprite.name = name.toStdString();
-	sprite.material = Material::PackDocument(material.get(), doc, memo);
+	sprite.material = Material::PackDocument(material.get(), doc, memo, frame);
 
-	sprite.frames.resize(noFrames());
-	material->PackFrames(sprite, doc, memo);
-
+	sprite.frames.AABB = frame.x;
+	sprite.frames.crop = frame.y;
+	sprite.frames.texCoord0 = frame.z;
+	sprite.frames.texCoord1 = frame.w;
+	sprite.frames.count = noFrames();
 
 //pack attachments
 	sprite.attachments.resize(attachments.size());
@@ -80,16 +92,19 @@ int Object::PackDocument(Sprites::Document & doc, PackMemo & memo)
 	}
 
 //pack attachment locations
-	for(uint32_t j = 0; j < sprite.frames.size(); ++j)
-	{
-		sprite.frames[j].attachments.resize(sprite.attachments.size());
+	std::vector<glm::i16vec2> att_data(noFrames() * attachments.size());
 
-		for(uint32_t i = 0; i < attachments.size(); ++i)
+	for(auto frame = 0u; frame < noFrames(); ++frame)
+	{
+		glm::i16vec2 * array = att_data.data() + frame * attachments.size();
+
+		for(auto point = 0u; point < attachments.size(); ++point)
 		{
-			sprite.frames[j].attachments[i][0] = attachments[i].coords[j].x;
-			sprite.frames[j].attachments[i][1] = attachments[i].coords[j].y;
+			array[point] = 	attachments[point].coords[frame];
 		}
 	}
+
+	sprite.frames.attachments = memo.PackAccessor(att_data);
 
 //push animations
 	sprite.animations.resize(animations.size());

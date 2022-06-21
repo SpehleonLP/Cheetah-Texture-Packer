@@ -23,14 +23,15 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 	void InterlaceBuffers(std::unique_ptr<uint32_t[]> array, uint32_t size);
 
 	template<int S, typename T, glm::qualifier Q>
-	int32_t PackAccessor(glm::vec<S, T, Q> * array, uint32_t length, bool normalize, bool take_memory)
+	int32_t PackAccessor(glm::vec<S, T, Q> const* array, uint32_t length, bool normalize, bool take_memory)
 	{
+		static_assert(ComponentTypeId<T>::ComponentType != 0, "unidentified component type");
+
 		auto itr = m_knownAccessors.find(array);
 
 		if(itr != m_knownAccessors.end())
 			return itr->second;
 
-		static_assert(ComponentTypeId<T>::ComponentType != 0, "unidentified component type");
 
 		auto value = PackAccessor(
 			(void*)array, length,
@@ -38,29 +39,60 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 			(Type)S,
 			normalize, take_memory);
 
-		itr[array] = value;
+		m_knownAccessors[array] = value;
 		return value;
 	}
 
 	template<typename T>
-	int32_t PackAccessor(ConstSizedArray<T> const& array, bool normalize = false)
+	int32_t PackAccessor(T * const& array, uint32_t length, bool normalize, bool take_memory)
 	{
-		return PackAccessor(array.data(), array.size(), normalize, false);
+		static_assert(std::is_fundamental<T>::value);
+		static_assert(ComponentTypeId<T>::ComponentType != 0, "unidentified component type");
+
+		auto itr = m_knownAccessors.find(array);
+
+		if(itr != m_knownAccessors.end())
+			return itr->second;
+
+		auto value = PackAccessor(
+			(void*)array, length,
+			(ComponentType)ComponentTypeId<T>::ComponentType,
+			(Type)1,
+			normalize, take_memory);
+
+		m_knownAccessors[array] = value;
+		return value;
 	}
 
-	int32_t PackAccessor(void * array, uint32_t length, ComponentType, Type, bool normalize, bool take_memory);
+	template<int S, typename T, glm::qualifier Q>
+	int32_t PackAccessor(ConstSizedArray<glm::vec<S, T, Q>> const& array, bool normalize = false)
+		{ return PackAccessor<S, T, Q>(array.data(), array.size(), normalize, false); }
+
+	template<typename T>
+	int32_t PackAccessor(ConstSizedArray<T> const& array, bool normalize = false)
+		{ return PackAccessor<T>(array.data(), array.size(), normalize, false); }
+
+	template<int S, typename T, glm::qualifier Q>
+	int32_t PackAccessor(std::vector<glm::vec<S, T, Q>> const& array, bool normalize = false)
+		{ return PackAccessor<S, T, Q>(array.data(), array.size(), normalize, false); }
+
+	template<typename T>
+	int32_t PackAccessor(std::vector<T> const& array, bool normalize = false)
+		{ return PackAccessor<T>(array.data(), array.size(), normalize, false); }
+
+	int32_t PackAccessor(void const* array, uint32_t length, ComponentType, Type, bool normalize, bool take_memory);
 
 	struct BufferPtr
 	{
 		BufferPtr() = default;
 		BufferPtr(BufferPtr const&) = delete;
 		BufferPtr(BufferPtr &&);
-		~BufferPtr() { if(ownsData) free(data); }
+		~BufferPtr() { if(ownsData) std::free(const_cast<uint8_t*>(data)); }
 
 		bool operator==(BufferPtr const&) const;
 		bool operator!=(BufferPtr const& it) const { return !(*this == it); }
 
-		uint8_t * data{};
+		uint8_t const* data{};
 		uint32_t size{};
 		uint16_t stride{};
 		int32_t  bufferViewId{-1};

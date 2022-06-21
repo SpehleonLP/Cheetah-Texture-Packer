@@ -1,5 +1,6 @@
 #ifndef IMAGE_H
 #define IMAGE_H
+#include "imagekey.h"
 #include "Support/counted_string.h"
 #include "Support/countedsizedarray.hpp"
 #include <glm/gtc/type_precision.hpp>
@@ -22,8 +23,11 @@ namespace IO { struct Image; }
 class Image
 {
 public:
+	static counted_ptr<Image> Factory(counted_ptr<ImageManager>, std::string const& path);
+
 	void AddRef() const { ++m_refCount; }
-	void Release() { if(--m_refCount == 0) { Clear(); delete this; } }
+	void Release() { if(--m_refCount == 0) { Destroy(); } }
+	int GetRefCount() const { return m_refCount; }
 
 	void LoadFromFile();
 	void Clear();
@@ -37,15 +41,20 @@ public:
 	uint32_t GetTexture() const { return m_texture; };
 	glm::u16vec2 GetSize() const { return m_size; }
 
-	std::string getFilename() const;
-	std::string getDirectory() const;
-	std::string getMimeType() const;
+	std::string getFilename()	const { return m_key.getFilename(); }
+	std::string getDirectory()	const { return m_key.getDirectory(); }
+	std::string getMimeType()	const { return m_key.getMimeType(); }
+
+	ImageKey const& key() const { return m_key; }
 
 private:
-	Image(counted_ptr<ImageManager>, std::string const& path, IO::Image & image);
+friend class ImageManager;
+	Image(counted_ptr<ImageManager>, const ImageKey & key);
+	Image(counted_ptr<ImageManager>, const ImageKey & key, IO::Image && image, counted_ptr<ImageTextureCoordinates> &&);
 	~Image();
 
-	static std::mutex               g_mutex;
+	void LoadImage(IO::Image & image);
+	bool Destroy();
 
 	counted_ptr<ImageManager>       m_manager;
 	ImageKey						m_key;

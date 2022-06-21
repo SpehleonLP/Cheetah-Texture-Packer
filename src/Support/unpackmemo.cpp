@@ -1,20 +1,28 @@
 #include "unpackmemo.h"
 #include "gltf_stl_accessor.h"
+#include "Sprite/imagemanager.h"
 #include "Support/getuniquecountedarray.h"
 #include "Sprite/imagetexturecoordinates.h"
 
-UnpackMemo::UnpackMemo() {}
+UnpackMemo::UnpackMemo(std::string const& documentFilePath) : documentFilePath(documentFilePath) {}
 UnpackMemo::~UnpackMemo() {}
 
-counted_ptr<Image> UnpackMemo::UnpackImage(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, fx::gltf::Material::Texture const& texture)
+counted_ptr<Image> UnpackMemo::UnpackImage(ImageManager * manager, UnpackMemo & memo, Sprites::Document const& doc, fx::gltf::Material::Texture const& _texture)
 {
-	UpdateFrames(spr);
+	if((uint32_t)_texture.index >= doc.textures.size())
+		return {};
 
+	auto & texture = doc.textures[_texture.index];
 
+	if((uint32_t)texture.source >= doc.images.size())
+		return {};
 
+	if((uint32_t)texture.texCoords >= doc.texCoords.size())
+		return {};
 
+	ImageKey key(memo.documentFilePath, texture.source);
 
-
+	return manager->GetImage(memo, doc, texture.source, texture.texCoords);
 }
 
 

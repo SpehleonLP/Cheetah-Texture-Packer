@@ -15,6 +15,11 @@ struct CountedStringHandle
 class counted_string
 {
 public:
+	enum
+	{
+		npos = ~0llu
+	};
+
 	static counted_string Get(const char * str);
 	static counted_string Get(std::string const& str) { return Get(str.c_str()); }
 
@@ -52,9 +57,31 @@ public:
 	template<typename T> inline	bool operator> (T const& in) const { return compare(in) >  0; };
 	template<typename T> inline bool operator>=(T const& in) const { return compare(in) >= 0; };
 
-
 	counted_string & operator=(counted_string const& in);
 	counted_string & operator=(counted_string && in);
+
+	std::string substr(size_t pos = 0, size_t len = npos) const;
+
+	inline size_t find_first_of		(const char* s, size_t pos = 0)		const { return find_first_of	(s, pos, npos); }
+	inline size_t find_first_not_of (const char* s, size_t pos = 0)		const { return find_first_not_of(s, pos, npos); }
+	inline size_t find_last_of		(const char* s, size_t pos = npos)	const { return find_last_of		(s, pos, npos); }
+	inline size_t find_last_not_of  (const char* s, size_t pos = npos)	const { return find_last_not_of	(s, pos, npos); }
+
+	inline size_t find_first_not_of (char c, size_t pos = 0)		const { char buf[2]{c, 0}; return find_first_not_of	(buf, pos, npos); }
+	inline size_t find_first_of		(char c, size_t pos = 0)		const { char buf[2]{c, 0}; return find_first_of		(buf, pos, npos); }
+	inline size_t find_last_of		(char c, size_t pos = npos)		const { char buf[2]{c, 0}; return find_last_of		(buf, pos, npos); }
+	inline size_t find_last_not_of  (char c, size_t pos = npos)		const { char buf[2]{c, 0}; return find_last_not_of	(buf, pos, npos); }
+
+	inline size_t find_first_of		(const std::string& str, size_t pos = 0)		const { return find_first_of	(str.c_str(), pos, npos); }
+	inline size_t find_first_not_of (const std::string& str, size_t pos = 0)		const { return find_first_not_of(str.c_str(), pos, npos); }
+	inline size_t find_last_of		(const std::string& str, size_t pos = npos)		const { return find_last_of		(str.c_str(), pos, npos); }
+	inline size_t find_last_not_of  (const std::string& str, size_t pos = npos)		const { return find_last_not_of (str.c_str(), pos, npos); }
+
+	size_t find_first_of	 (const char* s, size_t pos, size_t n) const;
+	size_t find_first_not_of (const char* s, size_t pos, size_t n) const;
+	size_t find_last_of		 (const char* s, size_t pos, size_t n) const;
+	size_t find_last_not_of  (const char* s, size_t pos, size_t n) const;
+
 
 	char at(size_t it) const
 	{

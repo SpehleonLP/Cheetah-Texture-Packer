@@ -30,9 +30,6 @@ ObjectCommand::ObjectCommand(Document * doc, int obj, counted_string insert) :
 		object = UncountedWrap(new Object(doc->GetViewWidget()));
 		object->name = new_name;
 	}
-
-
-	RollForward();
 }
 
 void ObjectCommand::RollForward()
@@ -66,13 +63,11 @@ AnimationCommand::AnimationCommand(Document *doc, int obj, int anim, Animation *
 
 	if(animation != nullptr)
 		prev_state = *animation;
-	else
+	else if(insert != nullptr)
 	{
 		animation = UncountedWrap(new Animation(*insert));
 		prev = nullptr;
 	}
-
-	RollForward();
 }
 
 void AnimationCommand::RollForward()
@@ -151,11 +146,10 @@ void AnimationCommand::UpdateAnimation(Animation const& it)
 }
 
 
-AttachmentCommand::AttachmentCommand(Document * doc, int obj, int att, std::string insert) :
+AttachmentCommand::AttachmentCommand(Document * doc, int obj, int, std::string insert) :
 	object(doc->objects[obj]),
 	new_attachment(counted_string::MakeUnique(insert))
 {
-	RollForward();
 }
 
 void AttachmentCommand::RollForward()

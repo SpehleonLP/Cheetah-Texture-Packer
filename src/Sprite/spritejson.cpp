@@ -92,6 +92,7 @@ inline void to_json(nlohmann::json & json, TexCoords const& db)
 inline void from_json(nlohmann::json const & json, Sprite::Frame & db)
 {
 	ReadOptionalField("attachments", json, db.attachments);
+	ReadRequiredField("count",		 json, db.count);
 	ReadRequiredField("AABB",        json, db.AABB);
 	ReadRequiredField("crop",        json, db.crop);
 	ReadRequiredField("texCoord0",   json, db.texCoord0);
@@ -101,6 +102,7 @@ inline void from_json(nlohmann::json const & json, Sprite::Frame & db)
 inline void to_json(nlohmann::json & json, Sprite::Frame const& db)
 {
 	fx::gltf::detail::WriteField("attachments", json, db.attachments, -1);
+	WriteRequiredField("count",       json, db.count);
 	WriteRequiredField("AABB",        json, db.AABB);
 	WriteRequiredField("crop",        json, db.crop);
 	WriteRequiredField("texCoord0",   json, db.texCoord0);

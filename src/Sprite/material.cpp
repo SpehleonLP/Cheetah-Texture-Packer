@@ -27,7 +27,7 @@ Material::Material()
 	emissiveTexture.texCoord  = 2 + (int)Tex::Emission;
 }
 
-Material::Material(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo) :
+Material::Material(ImageManager * manager, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo) :
 	Material()
 {
 	*static_cast<fx::gltf::Material*>(this) = doc.materials[spr.material];
@@ -35,8 +35,7 @@ Material::Material(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Docum
 	LoadExtensionsAndExtras();
 
 #define UnpackImage(TEXTURE, ST) \
-	SetImage(memo.UnpackImage(gl, spr, doc, TEXTURE), &image_slots[(int)ST]); \
-	tex_coords[(int)ST] = pbrMetallicRoughness.baseColorTexture.texCoord
+	SetImage(memo.UnpackImage(manager, memo, doc, TEXTURE), &image_slots[(int)ST]);
 
 	UnpackImage(pbrMetallicRoughness.baseColorTexture, Tex::BaseColor);
 	UnpackImage(ext.pbrSpecularGlossiness.diffuseTexture, Tex::Diffuse);
@@ -46,6 +45,8 @@ Material::Material(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Docum
 	UnpackImage(occlusionTexture, Tex::Occlusion);
 	UnpackImage(emissiveTexture, Tex::Emission);
 }
+
+Material::~Material() {}
 
 void Material::Clear(GLViewWidget * gl)
 {
@@ -123,30 +124,34 @@ std::string Material::IsImageCompatible(Material::Tex tex, counted_ptr<Image> im
 
 		image->LoadFromFile();
 
+		GetTextureCoordinates(image);
+
 	//first one so anything goes
 		for(int i = 0; i < (int)Tex::Total; ++i)
 		{
 			if(tex == (Tex)i)
 				continue;
 
-			if(image_slots[i])
+			if(image_slots[i].empty()) continue;
+
+			switch(image_slots[i]->m_texCoords->IsCompatible(image->m_texCoords.get()))
 			{
-				switch(image_slots[i]->m_texCoords->IsCompatible(image->m_texCoords.get()))
-				{
-				case ImageTextureCoordinates::Compatibility::CountMismatch:
-					return "number of sprites in image does not match number in material.";
-				case ImageTextureCoordinates::Compatibility::NormSizeMismatch:
-					return "sprites in image do not properly align with sprites in material.";
-				default:
-					break;
-				}
+			case ImageTextureCoordinates::Compatibility::CountMismatch:
+				return "number of sprites in image does not match number in material.";
+			case ImageTextureCoordinates::Compatibility::NormSizeMismatch:
+				return "sprites in image do not properly align with sprites in material.";
+			default:
+				break;
 			}
+
 		}
 	}
 	catch(std::exception & e)
 	{
 		return e.what();
 	}
+
+	return {};
 }
 
 void Material::CreateDefaultArrays(GLViewWidget* gl)
@@ -330,7 +335,7 @@ void Material::Prepare(GLViewWidget* gl)
 
 void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
 {
-	if(m_texCoords == nullptr)	return;
+	if(m_spriteSheet == nullptr)	return;
 
 	if(isUnlit())
 	{
@@ -478,6 +483,8 @@ void PackTexture(fx::gltf::Material::Texture * dst, Image * This, int texCoords,
 //push sampler
 	fx::gltf::Texture texture;
 	texture.source = doc.images.size();
+	texture.texCoords = This->m_texCoords->Pack(doc, memo);
+
 	doc.textures.push_back(texture);
 
 	uint32_t file_size{};
@@ -495,7 +502,7 @@ void PackTexture(fx::gltf::Material::Texture * dst, Image * This, int texCoords,
 	dst->texCoord = texCoords;
 }
 
-int Material::PackDocument(Material * This, Sprites::Document & doc, PackMemo & memo)
+int Material::PackDocument(Material * This, Sprites::Document & doc, PackMemo & memo, glm::ivec4 & frame)
 {
 	if(This == nullptr)
 		return -1;
@@ -510,10 +517,13 @@ int Material::PackDocument(Material * This, Sprites::Document & doc, PackMemo & 
 	doc.materials.push_back(*This);
 	auto & mat = doc.materials.back();
 
+	TexCoord_t tex_coordsOut;
+	auto tex_coords = This->GetTextureCoordinates(tex_coordsOut);
+
 //duplicate it so we can change things around...
 	MaterialExtensions ext = This->ext;
 
-#define PackImage(path, index) PackTexture(&path, This->image_slots[(int)index].get(), This->tex_coords[(int)index], doc, memo)
+#define PackImage(path, index) PackTexture(&path, This->image_slots[(int)index].get(), tex_coords[(int)index], doc, memo)
 
 	PackImage(mat.pbrMetallicRoughness.baseColorTexture, Tex::BaseColor);
 	PackImage(ext.pbrSpecularGlossiness.diffuseTexture, Tex::Diffuse);
@@ -524,6 +534,11 @@ int Material::PackDocument(Material * This, Sprites::Document & doc, PackMemo & 
 	PackImage(mat.emissiveTexture, Tex::Emission);
 
 	fx::gltf::detail::WriteField("extensions", mat.extensionsAndExtras, ext);
+
+	frame.x = memo.PackAccessor(This->m_texCoords->sprites());
+	frame.y = memo.PackAccessor(This->m_texCoords->cropped());
+	frame.z = memo.PackAccessor(tex_coordsOut[0], true);
+	frame.w = memo.PackAccessor(tex_coordsOut[1].empty()? tex_coordsOut[0] : tex_coordsOut[1], true);
 
 	return material_id;
 }
@@ -559,4 +574,58 @@ void Material::LoadExtensionsAndExtras()
 	}
 
 	extensionsAndExtras.clear();
+}
+
+Material::TexIndex_t Material::GetTextureCoordinates(counted_ptr<Image> image)
+{
+	TexCoord_t c;
+
+	if(image)
+		c[0] = image->m_texCoords->normalizedCrop();
+
+	return GetTextureCoordinates(c);
+}
+
+Material::TexIndex_t Material::GetTextureCoordinates(TexCoord_t & texCoords)
+{
+	Material::TexIndex_t r;
+
+	for(auto i = 0u; i < image_slots.size(); ++i)
+	{
+		r[i] = -1;
+
+		if(image_slots[i].empty()) continue;
+
+		auto coords = image_slots[i]->m_texCoords->normalizedCrop();
+
+		for(auto j = 0u; j < texCoords.size(); ++j)
+		{
+			if(texCoords[i] == coords)
+			{
+				r[i] = j;
+				break;
+			}
+		}
+
+		if(r[i] == -1)
+		{
+			for(auto j = 0u; j < texCoords.size(); ++j)
+			{
+				if(texCoords[i].empty())
+				{
+					texCoords[i] = coords;
+					r[i]		 = j;
+					break;
+				}
+			}
+		}
+
+		if((uint32_t)r[i] >= texCoords.size())
+		{
+			throw std::logic_error("incompatible texCoords in image");
+		}
+	}
+
+
+	return r;
 }

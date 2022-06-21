@@ -57,7 +57,7 @@ int32_t PackMemo::PackIndices(uint16_t * ptr, uint32_t size, bool take_memory)
 
 }
 
-int32_t PackMemo::PackAccessor(void * ptr, uint32_t size, ComponentType component_type, Type type, bool normalize, bool take_memory)
+int32_t PackMemo::PackAccessor(const void * ptr, uint32_t size, ComponentType component_type, Type type, bool normalize, bool take_memory)
 {
 	BufferPtr buffer;
 	buffer.data = (uint8_t*)ptr;
@@ -191,7 +191,7 @@ void PackMemo::PackDocument(Sprites::Document & doc)
 }
 
 template<typename T, int elements>
-void GetMinMax2(void * _array, uint32_t length, uint32_t stride, std::vector<float> * min, std::vector<float> * max)
+void GetMinMax2(void const* _array, uint32_t length, uint32_t stride, std::vector<float> * min, std::vector<float> * max)
 {
 	min->resize(elements, 0);
 	max->resize(elements, 0);

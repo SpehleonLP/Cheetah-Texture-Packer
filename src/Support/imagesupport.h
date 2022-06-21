@@ -12,6 +12,7 @@
 #define USE_BASISU 0
 
 class GLViewWidget;
+namespace Sprites { struct Document; }
 
 #if USE_BASISU
 namespace basisu
@@ -44,10 +45,17 @@ namespace IO
 		uint32_t                   internalFormat{};
 		uint32_t                   type{};
 		uint32_t                   bytes{};
+		bool					   hasAlpha{};
 	};
 
 	std::string MimeType(const char * path);
 	IO::Image LoadImage(const char * path);
+	IO::Image LoadImage(Sprites::Document const& doc, int source);
+
+	IO::Image LoadImage(QImage &&);
+
+
+
 //	void SaveImage(const char * path, uint8_t * data, glm::i16vec2 size, int channels);
 
 	void UploadImage(GLViewWidget * gl, uint32_t * texture, uint8_t * data, glm::i16vec2 size, uint32_t internal_format, uint32_t format, uint32_t type);

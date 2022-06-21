@@ -281,7 +281,8 @@ typedef CountedSizedArray<T> non_const_type;
 		return true;
 	}
 
-	T  const* data() const { return m_array? &m_array[0] : nullptr; }
+	T       * data()       { return m_array? &m_array->m_data[0] : nullptr; }
+	T  const* data() const { return m_array? &m_array->m_data[0] : nullptr; }
 
 private:
 	counted_ptr<Array> m_array;

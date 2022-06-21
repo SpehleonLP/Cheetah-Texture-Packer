@@ -37,6 +37,13 @@ counted_ptr<ImageTextureCoordinates> ImageTextureCoordinates::Factory(IO::Image 
 	return Factory(sprites, cropped, normalized, normalizedPositions);
 }
 
+//shell function in case we need it later.
+counted_ptr<ImageTextureCoordinates> ImageTextureCoordinates::Factory(std::vector<counted_ptr<ImageTextureCoordinates>> const& array)
+{
+	if(array.empty()) return {};
+	return array[0];
+}
+
 counted_ptr<ImageTextureCoordinates> ImageTextureCoordinates::Factory(i16vec4array const& sprites, i16vec4array const& crop, u16vec4array const& normalized, u16vec4array const& positions)
 {
 	auto ptr = CountedWrap(new ImageTextureCoordinates(MakeUnique(sprites), MakeUnique(crop), MakeUnique(normalized), MakeUnique(positions)));
@@ -84,5 +91,4 @@ int32_t ImageTextureCoordinates::Pack(Sprites::Document & doc, PackMemo & memo) 
 
 	doc.texCoords.push_back(buffer);
 	return id;
-
 }

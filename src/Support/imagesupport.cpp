@@ -10,6 +10,7 @@
 #include <cctype>
 #include <cstring>
 #include "lf_math.h"
+#include "Sprite/spritejson.h"
 
 #if USE_BASISU
 
@@ -377,7 +378,8 @@ std::string IO::MimeType(const char * path)
 	return result.toStdString();
 }
 
-IO::Image IO::LoadImage(const char * path)
+
+QImage    LoadQImage(const char * path)
 {
 	QImageReader reader(path);
 	reader.setAutoTransform(true);
@@ -390,34 +392,135 @@ IO::Image IO::LoadImage(const char * path)
 				reader.errorString()).toStdString());
     }
 
+	return newImage;
+}
+
+IO::Image IO::LoadImage(const char * path) { return LoadImage(LoadQImage(path)); }
+
+struct Image
+{
+int32_t bufferView{-1};
+
+std::string name;
+std::string uri;
+std::string mimeType;
+
+nlohmann::json extensionsAndExtras{};
+
+bool IsEmbeddedResource() const noexcept;
+void MaterializeData(std::vector<uint8_t> & data) const;
+};
+
+struct BufferView
+{
+enum class TargetType : uint16_t
+{
+None = 0,
+ArrayBuffer = 34962,
+ElementArrayBuffer = 34963
+};
+
+std::string name;
+
+int32_t buffer{ -1 };
+uint32_t byteOffset{};
+uint32_t byteLength{};
+uint32_t byteStride{};
+
+TargetType target{ TargetType::None };
+
+nlohmann::json extensionsAndExtras{};
+};
+
+struct Buffer
+{
+uint32_t byteLength{};
+
+std::string name;
+std::string uri;
+
+nlohmann::json extensionsAndExtras{};
+
+std::vector<uint8_t> data{};
+
+bool IsEmbeddedResource() const noexcept;
+void SetEmbeddedResource();
+};
+
+std::pair<const char *, size_t> GetBuffer(Sprites::Document const& doc, int _bufferview)
+{
+	if((uint32_t)_bufferview >= doc.bufferViews.size())
+		throw std::runtime_error("invalid bufferView index in image: " + std::to_string(_bufferview));
+
+	auto & bufferView = doc.bufferViews[_bufferview];
+
+	if((uint32_t)bufferView.target != 0 || bufferView.byteStride != 0)
+		throw std::runtime_error("bufferView does not represent image data");
+
+	if((uint32_t)bufferView.buffer >= doc.buffers.size())
+		throw std::runtime_error("invalid buffer index in bufferView: " + std::to_string(bufferView.buffer));
+
+	auto & buffer = doc.buffers[bufferView.buffer];
+
+	if(buffer.data.empty())
+		throw std::logic_error("buffer needs to be loaded by this point in code.");
+
+	if(buffer.byteLength < bufferView.byteOffset + bufferView.byteLength)
+		throw std::runtime_error("buffer overrun");
+
+	return {(const char*)&buffer.data[bufferView.byteOffset], bufferView.byteLength};
+}
+
+IO::Image IO::LoadImage(Sprites::Document const& doc, int source)
+{
+	if((uint32_t)source >= doc.images.size())
+		return {};
+
+	auto & image = doc.images[source];
+
+	if(image.uri.size() && (uint32_t)image.bufferView >= doc.bufferViews.size())
+		return LoadImage(LoadQImage(image.uri.c_str()));
+
+	auto buffer_pair = GetBuffer(doc, image.bufferView);
+
+	QImage newImage;
+	if(!newImage.loadFromData(QByteArray(buffer_pair.first, buffer_pair.second)))
+		throw std::runtime_error("failed to load image from buffer for unknown reason");
+
+	return LoadImage(std::move(newImage));
+}
+
+IO::Image IO::LoadImage(QImage && qimage)
+{
 	IO::Image image;
-//convert image to proper format
 
-	QImage::Format GetTargetFormat(QImage::Format in, QImage::Format);
-
-	bool uses_alpha = Qt_to_Gl::ImageUsesAlpha(newImage);
+//convert image to properformat
+	bool uses_alpha = Qt_to_Gl::ImageUsesAlpha(qimage);
 
 	auto format = uses_alpha? QImage::Format_ARGB32 : QImage::Format_RGB888; //Qt_to_Gl::GetTargetFormat(newImage);
 
-	if(format != newImage.format())
-		newImage = newImage.convertToFormat(format,
+	if(format != qimage.format())
+		qimage = qimage.convertToFormat(format,
 			Qt::AutoColor
 			| Qt::DiffuseDither
 			| Qt::DiffuseAlphaDither
 			| Qt::PreferDither);
 
-	image.size = glm::i16vec2(newImage.width(), newImage.height());
+	image.size = glm::i16vec2(qimage.width(), qimage.height());
 	image.format         = Qt_to_Gl::GetFormat(format);
 	image.internalFormat = Qt_to_Gl::GetInternalFormat(format);
 	image.type           = Qt_to_Gl::GetType(format);
-	image.bytes          =  image.size.y*newImage.bytesPerLine();
+	image.bytes          = image.size.y*qimage.bytesPerLine();
+	image.hasAlpha       = uses_alpha;
 
 	image.image.reset(new uint8_t[image.bytes]);
 
-	memcpy(&image.image[0], newImage.constBits(), image.bytes);
+	memcpy(&image.image[0], qimage.constBits(), image.bytes);
 
 	return image;
 }
+
+
 
 #else //USE_BASISU
 

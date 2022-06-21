@@ -8,6 +8,7 @@
 #include "Support/counted_string.h"
 #include "Support/counted_ptr.hpp"
 #include "image.h"
+#include "imagemanager.h"
 #include "object.h"
 #include <QFileInfo>
 #include <chrono>
@@ -31,13 +32,13 @@ struct Document
 	static std::unique_ptr<Document> OpenFile(GLViewWidget*gl, QFileInfo const& path);
 	static std::unique_ptr<Document> OpenFile(GLViewWidget*gl, QString const& path) { return OpenFile(gl, QFileInfo(path)); }
 
-	Document(GLViewWidget * gl, Sprites::Document const&);
-	Document(GLViewWidget*gl) : imageManager(gl) {}
+	Document(GLViewWidget * gl, Sprites::Document const&, const std::string & documentFilePath);
+	Document(GLViewWidget*gl) : imageManager(ImageManager::Factory(gl)) {}
 
 	Sprites::Document ToExportDocument();
 
-	Image::ImageManager   imageManager;
-	PackerSettings        settings;
+	counted_ptr<ImageManager> imageManager;
+	PackerSettings			  settings;
 
 //object -> materials
 	std::vector<counted_ptr<Object>>   objects;

@@ -73,6 +73,7 @@ struct Sprite : NeverEmpty
 	struct Frame : NeverEmpty
 	{
 		int32_t					 attachments{-1};
+		int32_t					 count{};
 
 //original position on the sprite sheet
 		int32_t					 AABB{-1};

@@ -51,12 +51,6 @@ struct MaterialExtensions
 struct Material : fx::gltf::Material
 {
 public:
-	static int PackDocument(Material * mat, Sprites::Document & doc, PackMemo & mapping);
-
-	Material();
-	Material(GLViewWidget * gl, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo);
-	~Material() = default;
-
 	enum class Tex : int8_t
 	{
 		None = -1,
@@ -83,11 +77,25 @@ public:
 		VBOc
 	};
 
+	enum class TexCoords
+	{
+		Total = 2
+	};
+
+
+typedef std::array<ConstSizedArray<glm::u16vec4>, (int)TexCoords::Total>	TexCoord_t;
+typedef std::array<int, (int)Tex::Total>									TexIndex_t;
+typedef std::array<counted_ptr<Image>, (int)Tex::Total>						ImageSlot_t;
+
+	static int PackDocument(Material * mat, Sprites::Document & doc, PackMemo & mapping, glm::ivec4 & frame);
+
+	Material();
+	Material(ImageManager * manager, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo);
+	~Material();
 
 	MaterialExtensions ext;
 
-	counted_ptr<Image>                    image_slots[(int)Tex::Total];
-	int8_t                                tex_coords[(int)Tex::Total];
+	ImageSlot_t						     image_slots;
 	counted_ptr<ImageTextureCoordinates>  m_texCoords;
 
 	void Clear(GLViewWidget * gl);
@@ -102,6 +110,11 @@ public:
 
 	std::string IsImageCompatible(Material::Tex, counted_ptr<Image>);
 	void SetImage(counted_ptr<Image> image, counted_ptr<Image> * slot);
+
+	TexIndex_t GetTextureCoordinates(counted_ptr<Image> image);
+	TexIndex_t GetTextureCoordinates(TexCoord_t & coord);
+
+	inline TexIndex_t GetTextureCoordinates() { TexCoord_t c; return GetTextureCoordinates(c); }
 
 	inline int & TexCoord(Tex tex)
 	{
@@ -127,7 +140,6 @@ public:
 
 	void Prepare(GLViewWidget*);
 private:
-
 	void CreateDefaultArrays(GLViewWidget* gl);
 
 	void CreateIdBuffer(GLViewWidget* gl);

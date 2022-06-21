@@ -16,6 +16,8 @@
 
 CommandInterface * Document::addCommand(std::unique_ptr<CommandInterface> it)
 {
+	it->RollForward();
+
 	commandList.resize(commandId);
 	commandList.push_back(std::move(it));
 	commandId++;
@@ -76,7 +78,8 @@ std::unique_ptr<Document> Document::OpenFile(GLViewWidget * gl, QFileInfo const&
 
 	try
 	{
-		r.reset(new Document(gl, Sprites::LoadFromBinary(path.filePath().toStdString(), false)));
+		auto std_path = path.filePath().toStdString();
+		r.reset(new Document(gl, Sprites::LoadFromBinary(std_path, false), std_path));
 	}
 	catch(std::exception & e)
 	{
@@ -188,15 +191,15 @@ GLViewWidget * Document::GetViewWidget() const
 	return m_window->ui->viewWidget;
 }
 
-Document::Document(GLViewWidget * gl, Sprites::Document const& doc) :
-	imageManager(gl)
+Document::Document(GLViewWidget * gl, Sprites::Document const& doc, std::string const& documentFilePath) :
+	imageManager(ImageManager::Factory(gl))
 {
-	UnpackMemo memo;
+	UnpackMemo memo(documentFilePath);
 
 	objects.reserve(doc.sprites.size());
 
 	for(auto &item : doc.sprites)
-		objects.push_back(UncountedWrap(new Object(gl, item, doc, memo)));
+		objects.push_back(UncountedWrap(new Object(imageManager.get(), item, doc, memo)));
 }
 
 Sprites::Document ToExportDocument()

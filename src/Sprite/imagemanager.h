@@ -1,5 +1,6 @@
 #ifndef IMAGEMANAGER_H
 #define IMAGEMANAGER_H
+#include "imagekey.h"
 #include "Support/counted_ptr.hpp"
 #include <map>
 #include <mutex>
@@ -8,6 +9,8 @@
 class GLViewWidget;
 class Image;
 struct ImageKey;
+class UnpackMemo;
+namespace Sprites { struct Document; }
 
 class ImageManager
 {
@@ -19,8 +22,9 @@ public:
 	void AddRef() const { ++m_refCount; }
 	void Release() { if(--m_refCount == 0) { delete this; } }
 
-	bool RemoveImage(Image * it);
-	counted_ptr<Image> GetImage(Image * it);
+	bool RemoveImage(const Image & it);
+	counted_ptr<Image> GetImage(ImageKey const& it);
+	counted_ptr<Image> GetImage(UnpackMemo & memo, Sprites::Document const& doc, int source, int texCoords);
 
 private:
 	ImageManager(GLViewWidget *gl) : gl(gl) {}
@@ -28,13 +32,8 @@ private:
 
 	std::mutex					 m_mutex;
 
-	struct Key
-	{
-
-	};
-
 	mutable std::atomic<int>	  m_refCount;
-	std::map<std::string, Image*> loadedImages;
+	std::map<ImageKey, Image*>    loadedImages;
 	GLViewWidget               *  gl;
 };
 

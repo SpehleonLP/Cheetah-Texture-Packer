@@ -461,7 +461,7 @@ void MainWindow::ImportSprite()
 		if(path.empty())
 			return;
 
-		auto image = Image::Factory(&document->imageManager, path);
+		auto image = Image::Factory(document->imageManager, path);
 
 		auto command  = std::make_unique<ObjectCommand>(document.get(), document->objects.size(), image->getFilename());
 		auto material = command->GetObject().get()->material.get();
