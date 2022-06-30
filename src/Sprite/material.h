@@ -139,6 +139,10 @@ typedef std::array<counted_ptr<Image>, (int)Tex::Total>						ImageSlot_t;
 	uint32_t noFrames() const  { return m_spriteCount; }
 
 	void Prepare(GLViewWidget*);
+
+	glm::vec2 SheetSize() const { return m_sheetSize; }
+	glm::vec2 SpriteSize(int it) const;
+
 private:
 	void CreateDefaultArrays(GLViewWidget* gl);
 
@@ -147,6 +151,7 @@ private:
 
 	RenderData GetRenderData(int frame);
 	void RenderSheetBackdrop(GLViewWidget * gl, RenderData const& frame);
+	bool PrepareSheetBackdrop();
 
 	struct Pair
 	{
@@ -167,7 +172,7 @@ private:
 //made in prepare
 	uint32_t     m_vao{};
 	uint32_t     m_vbo[VBOc]{};
-	uint32_t     m_vboFlags{0};
+	uint32_t     m_dirtyTextureFlags{0};
 
 //made in prepare -> create default arrays
 	CountedSizedArray<glm::vec2>    m_normalizedPositions{};

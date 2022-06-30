@@ -44,7 +44,7 @@ class ObjectCommand : public CommandInterface
 {
 public:
 	ObjectCommand(Document * doc, int object, std::string insert) :
-		ObjectCommand(doc, object, counted_string::MakeUnique(insert)) {}
+		ObjectCommand(doc, object, counted_string::MakeShared(insert)) {}
 	ObjectCommand(Document * doc, int object, counted_string insert);
 	virtual ~ObjectCommand() = default;
 

@@ -48,7 +48,7 @@ SpriteFile double_image(SpriteFile const& image)
 		size += r.sizes[i].x * r.sizes[i].y;
 	}
 
-	for(uint32_t i = 0; i < r.count; ++i)
+	for(uint32_t i = 0; i < 1; ++i)
 	{
 		scaleSuperXbr((uint32_t*)image.pointers[i], (uint32_t*)r.pointers[i], image.sizes[i].x, image.sizes[i].y);
 	}

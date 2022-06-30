@@ -84,6 +84,7 @@ void Material::SetImage(counted_ptr<Image> image, counted_ptr<Image> * slot)
 		return;
 
 	image_slots[tex] = image;
+	m_dirtyTextureFlags |= (1 << tex);
 
 	std::vector<counted_ptr<ImageTextureCoordinates>> coords;
 
@@ -154,10 +155,26 @@ std::string Material::IsImageCompatible(Material::Tex tex, counted_ptr<Image> im
 	return {};
 }
 
+template<typename T>
+void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, std::vector<T> const& array)
+{
+	_gl glBindBuffer(type, vbo); DEBUG_GL
+	_gl glBufferData(type, array.size() * sizeof(array[0]), array.data(), GL_DYNAMIC_DRAW); DEBUG_GL
+};
+
+template<typename T>
+void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, ConstSizedArray<T> array)
+{
+	_gl glBindBuffer(type, vbo); DEBUG_GL
+	_gl glBufferData(type, array.size() * sizeof(array[0]), array.data(), GL_DYNAMIC_DRAW); DEBUG_GL
+};
+
 void Material::CreateDefaultArrays(GLViewWidget* gl)
 {
 	if(!m_normalizedPositions.empty() || m_spriteCount == 0)
 		return;
+
+	_gl glBindVertexArray(m_vao); DEBUG_GL
 
 	m_normalizedPositions = CountedSizedArray<glm::vec2>(m_spriteCount * 4);
 	m_spriteIndices       = CountedSizedArray<Pair>(m_spriteCount);
@@ -251,6 +268,8 @@ void Material::CreateIdBuffer(GLViewWidget* gl)
 
 void Material::Prepare(GLViewWidget* gl)
 {
+	bool created = false;
+
 	if(!m_vao)
 	{
 		_gl glGenVertexArrays(1, &m_vao);
@@ -262,6 +281,7 @@ void Material::Prepare(GLViewWidget* gl)
 
 		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[v_positions]);
 		_gl glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
 		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[v_spriteId]);
 		_gl glVertexAttribIPointer(1, 1, GL_SHORT, 0, nullptr);
 
@@ -278,20 +298,23 @@ void Material::Prepare(GLViewWidget* gl)
 			_gl glEnableVertexAttribArray(i);
 
 		GL_ASSERT;
+
+		created = true;
 	}
 
 //upload data
-	if(m_dirty != false)
+	if(m_dirtyTextureFlags || created || m_dirty)
 	{
+		CreateDefaultArrays(gl);
 		m_dirty = false;
 	}
 
-	if(m_vboFlags)
+	if(m_dirtyTextureFlags || created)
 	{
 		CreateDefaultArrays(gl);
 
-		auto flags = m_vboFlags;
-		m_vboFlags = 0;
+		auto flags = m_dirtyTextureFlags;
+		m_dirtyTextureFlags = 0;
 
 		for(int i = 0; i < (int)Tex::Total; ++i)
 		{
@@ -335,8 +358,6 @@ void Material::Prepare(GLViewWidget* gl)
 
 void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
 {
-	if(m_spriteSheet == nullptr)	return;
-
 	if(isUnlit())
 	{
 		for(int i = 0; i < (int)Tex::Total; ++i)
@@ -366,16 +387,48 @@ void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
 	gltfMetallicRoughness::Shader.bindLayer(gl, 4);
 	gltfMetallicRoughness::Shader.bindCenter(gl, db.center);
 
+	for(int i = 0; i < (int)Tex::Total; ++i)
+	{
+		_gl glActiveTexture(GL_TEXTURE0 + i);
+
+		if(image_slots[i] && image_slots[i]->LoadFromFile())
+		{
+			_gl glBindTexture(GL_TEXTURE_2D, image_slots[i]->GetTexture());
+		}
+		else
+		{
+			_gl glBindTexture(GL_TEXTURE_2D, 0);
+		}
+	}
+
 	_gl glDisable(GL_DEPTH_TEST);
 	_gl glDrawElements(GL_TRIANGLES, db.elements, GL_UNSIGNED_SHORT, db.offset());
 
 	GL_ASSERT;
 }
 
+glm::vec2 Material::SpriteSize(int it) const
+{
+	for(int i = 0; i < (int)Material::Tex::Total; ++i)
+	{
+		if(image_slots[i] != nullptr)
+		{
+			if(image_slots[i]->m_texCoords->sprites().size() < (uint32_t)it)
+			{
+				auto spr = image_slots[i]->m_texCoords->sprites()[it];
+				return glm::vec2(spr.z - spr.x, spr.w - spr.y);
+			}
+
+			return {0,0};
+		}
+	}
+
+	return {0,0};
+}
 
 void Material::RenderSpriteSheet(GLViewWidget * gl, Material::Tex image_slot, int frame)
 {
-	if(image_slots[(int)image_slot] == nullptr) return;
+	if(image_slots[(int)image_slot] == nullptr || image_slots[(int)image_slot]->LoadFromFile() == false) return;
 
 	Prepare(gl);
 	auto db = GetRenderData(frame);
@@ -394,12 +447,13 @@ void Material::RenderSpriteSheet(GLViewWidget * gl, Material::Tex image_slot, in
 	UnlitShader::Shader.bindColor(gl, glm::vec4(1, 1, 1, 1)); DEBUG_GL
 	UnlitShader::Shader.bindTexCoords(gl, TexCoord(image_slot)); DEBUG_GL
 
-	_gl glActiveTexture(GL_TEXTURE0);
-	_gl glBindTexture(GL_TEXTURE_2D, image_slots[(int)image_slot]->GetTexture());
+	_gl glActiveTexture(GL_TEXTURE0); DEBUG_GL
+	_gl glBindTexture(GL_TEXTURE_2D, image_slots[(int)image_slot]->GetTexture()); DEBUG_GL
 
-	_gl glDisable(GL_DEPTH_TEST);
-	_gl glDrawElements(GL_TRIANGLES, db.elements, GL_UNSIGNED_SHORT, db.offset());
+	_gl glDisable(GL_DEPTH_TEST); DEBUG_GL
+	_gl glDrawElements(GL_TRIANGLES, db.elements, GL_UNSIGNED_SHORT, db.offset()); DEBUG_GL
 
+	DEBUG_GL
 }
 
 RenderData Material::GetRenderData(int frame)
@@ -427,13 +481,21 @@ RenderData Material::GetRenderData(int frame)
 	return r;
 }
 
-void Material::RenderSheetBackdrop(GLViewWidget * gl, RenderData const& db)
+bool Material::PrepareSheetBackdrop()
 {
 	if(m_texCoords == nullptr)
-		return;
+		return false;
 
 	if(m_spriteSheet == nullptr)
 		m_spriteSheet.reset(new SpriteSheet());
+
+	return true;
+}
+
+void Material::RenderSheetBackdrop(GLViewWidget * gl, RenderData const& db)
+{
+	if(PrepareSheetBackdrop() == false)
+		return;
 
 	m_spriteSheet->Prepare(gl, m_texCoords->sprites(), m_sheetSize);
 	m_spriteSheet->RenderSheet(gl, db);

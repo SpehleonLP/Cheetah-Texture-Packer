@@ -27,7 +27,7 @@ public:
 	static counted_string MakeShared(std::string const& str) { return MakeShared(str.c_str()); }
 
 	static counted_string MakeUnique(const char * str);
-	static counted_string MakeUnique(std::string const& str) { return MakeShared(str.c_str()); }
+	static counted_string MakeUnique(std::string const& str) { return MakeUnique(str.c_str()); }
 
 	counted_string();
 	counted_string(counted_string const& in);

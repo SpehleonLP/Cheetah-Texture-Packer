@@ -29,7 +29,7 @@ public:
 	void Release() { if(--m_refCount == 0) { Destroy(); } }
 	int GetRefCount() const { return m_refCount; }
 
-	void LoadFromFile();
+	bool LoadFromFile();
 	void Clear();
 
 	std::unique_ptr<uint8_t[]> LoadFileAsArray(uint32_t & size) const;
@@ -64,6 +64,7 @@ friend class ImageManager;
 
 	bool                            m_hasAlpha{0};
 	bool                            m_isLoaded{0};
+	bool                            m_isLoading{0};
 	bool                            m_ownsTexture{0};
 
 	uint32_t                        m_texture{0};

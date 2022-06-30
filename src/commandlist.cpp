@@ -38,7 +38,12 @@ void ObjectCommand::RollForward()
 		doc->objects.erase(doc->objects.begin() + old_offset);
 
 	if(!new_name.empty())
+	{
 		doc->objects.insert(doc->objects.begin() + new_offset, object);
+
+		if(doc->objects.empty())
+			doc->objects.push_back(object);
+	}
 }
 
 void ObjectCommand::RollBack()
@@ -47,7 +52,12 @@ void ObjectCommand::RollBack()
 		doc->objects.erase(doc->objects.begin() + new_offset);
 
 	if(!old_name.empty())
+	{
 		doc->objects.insert(doc->objects.begin() + old_offset, object);
+
+		if(doc->objects.empty())
+			doc->objects.push_back(object);
+	}
 }
 
 AnimationCommand::AnimationCommand(Document *doc, int obj, int anim, Animation * insert) :

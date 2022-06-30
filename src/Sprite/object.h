@@ -50,6 +50,9 @@ struct Object
 	int PackDocument(Sprites::Document & doc, PackMemo & mapping);
 	inline uint32_t noFrames() const  { return material->noFrames(); }
 
+	glm::vec2 GetSize() const { return material? material->SheetSize() : glm::vec2(0, 0); }
+	glm::vec2 GetSpriteSize(int i) const { return material? material->SpriteSize(i) : glm::vec2(0, 0); }
+
 private:
 	mutable std::atomic<int> m_refCount{1};
 	GLViewWidget * gl;

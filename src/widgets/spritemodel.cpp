@@ -857,6 +857,20 @@ bool SpriteModel::VectorFromString(CountedSizedArray<uint16_t> & dst, QString co
 	return true;
 }
 
+glm::vec2 SpriteModel::GetItemSize(QModelIndex const& index) const
+{
+	Entity entity = index.internalPointer();
+
+	auto doc = window->document.get();
+
+	if(!index.isValid()
+	|| doc == nullptr
+	|| (uint32_t)entity.object >= doc->objects.size())
+		return {0,0};
+
+	return doc->objects[entity.object]->GetSize();
+}
+
 void SpriteModel::Render(GLViewWidget * gl, QModelIndex const& index)
 {
 	Entity entity = index.internalPointer();

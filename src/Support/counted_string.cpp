@@ -219,7 +219,7 @@ std::string counted_string::substr(size_t pos, size_t len) const
 
 	len = std::min(size(), std::max(len, pos+len)) - pos;
 
-	return std::string(c_str(), len);
+	return std::string(c_str()+pos, len);
 }
 
 
@@ -269,15 +269,13 @@ size_t counted_string::find_first_not_of (const char* s, size_t pos, size_t len)
 
 size_t counted_string::find_last_of		 (const char* s, size_t pos, size_t len) const
 {
-	if(pos > size())
-		return npos;
+	pos = std::min(size(), pos);
+	len = std::min<int64_t>(0, std::max<int64_t>(0, pos - (int64_t)len));
 
-	len = std::min(size(), std::max(len, pos+len));
+	const char * itr   = c_str() + pos;
+	const char * begin = c_str() + len;
 
-	const char * end = c_str() + pos;
-	const char * itr = c_str() + len-1;
-
-	for(; itr >= end; --itr)
+	for(; itr >= begin; --itr)
 	{
 		for(const char * p = s; *p != 0; ++p)
 		{

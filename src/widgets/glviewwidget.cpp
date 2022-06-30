@@ -312,13 +312,13 @@ void GLViewWidget::wheelEvent(QWheelEvent * wheel)
 		if(std::fabs(wheel->angleDelta().y()) > std::fabs(wheel->angleDelta().x()))
 		{
       //      if(w->document == nullptr) return;
-#if 0
-			auto pos = wheel->posF();
+
 			float angle = wheel->angleDelta().y();
 			float factor = std::pow(1.0015, angle);
 
             factor = w->SetZoom(w->GetZoom() * factor);
 
+			/*	auto pos = wheel->pos();
 			glm::vec2 scroll = glm::mix(scroll_destination, scroll_start, glm::vec2(factor));
 
 			if(factor != 1)
@@ -331,8 +331,7 @@ void GLViewWidget::wheelEvent(QWheelEvent * wheel)
 
                 w->SetScroll(scroll_destination);
 			}
-#endif
-
+*/
 			return;
 		}
 	}
@@ -386,6 +385,8 @@ void GLViewWidget::paintGL()
     glAssert();
 	int width = size().width();
 	int height = size().height();
+	auto dimensions = w->model->GetItemSize(w->ui->treeView->currentIndex());
+	auto scroll = w->GetScroll() * 2.f - 1.f;
 
 	Matrices mat;
 
@@ -399,8 +400,10 @@ void GLViewWidget::paintGL()
 
 	auto window_pos = mapFromGlobal(QCursor::pos());
 
-    mat.u_camera = glm::scale(glm::mat4(1), glm::vec3(w->GetZoom()));
-//    mat.u_camera = glm::translate(mat.u_camera, glm::vec3(-w->document->GetScreenCenter(), 0));
+	mat.u_camera = glm::mat4(1);
+	mat.u_camera = glm::translate(mat.u_camera, glm::vec3(0.6f * -scroll * dimensions, 0));
+    mat.u_camera = glm::scale(mat.u_camera, glm::vec3(w->GetZoom()));
+
 	mat.u_screenSize     = glm::ivec4(width, height, window_pos.x(), window_pos.y());
 	mat.u_cursorColor   = glm::vec4(window_pos.x(), size().height() - window_pos.y(), 0, 1);
 

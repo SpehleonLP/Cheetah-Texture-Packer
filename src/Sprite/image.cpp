@@ -128,10 +128,12 @@ std::unique_ptr<uint8_t[]> Image::LoadFileAsArray(uint32_t & size) const
 	return r;
 }*/
 
-void Image::LoadFromFile()
+bool Image::LoadFromFile()
 {
-	if(m_texture != 0 || m_key.empty())
-		return;
+	if(m_isLoading || m_isLoaded)
+		return (m_texture != 0);
+
+	m_isLoading = true;
 
 	auto gl = m_manager->GetGL();
 	gl->makeCurrent();
@@ -186,6 +188,11 @@ void Image::LoadFromFile()
 #endif
 
 	gl->doneCurrent();
+
+	m_isLoading = false;
+	m_isLoaded = true;
+
+	return m_texture != 0;
 }
 
 #if HAVE_CHROMA_KEY

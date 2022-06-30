@@ -2,6 +2,7 @@
 #define SPRITEMODEL_H
 #include "enums.hpp"
 #include "Support/countedsizedarray.hpp"
+#include <glm/vec2.hpp>
 #include <QAbstractItemModel>
 #include <memory>
 
@@ -81,6 +82,7 @@ public:
 	static bool VectorFromString(CountedSizedArray<uint16_t> & dst, QString const&);
 
 	static bool onSelected(QModelIndex const& index);
+	glm::vec2 GetItemSize(QModelIndex const& index) const;
 
 private:
 friend class MainWindow;
