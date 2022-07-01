@@ -146,7 +146,7 @@ typedef std::array<counted_ptr<Image>, (int)Tex::Total>						ImageSlot_t;
 private:
 	void CreateDefaultArrays(GLViewWidget* gl);
 
-	void CreateIdBuffer(GLViewWidget* gl);
+	std::vector<short> CreateIdBuffer() const;
 	void CreatePositionsFromNormalizedPositions(GLViewWidget * gl);
 
 	RenderData GetRenderData(int frame);
@@ -175,11 +175,13 @@ private:
 	uint32_t     m_dirtyTextureFlags{0};
 
 //made in prepare -> create default arrays
-	CountedSizedArray<glm::vec2>    m_normalizedPositions{};
-	CountedSizedArray<Pair>         m_spriteIndices{};
-	CountedSizedArray<Pair>         m_spriteVertices{};
+	ConstSizedArray<glm::vec2>    m_normalizedPositions{};
+	ConstSizedArray<Pair>         m_spriteIndices{};
+	ConstSizedArray<Pair>         m_spriteVertices{};
 
 private:
+	ConstSizedArray<glm::vec2>  CreateNormalizedPositions() const;
+
 	void LoadExtensionsAndExtras();
 };
 

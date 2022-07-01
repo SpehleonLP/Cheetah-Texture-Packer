@@ -191,7 +191,7 @@ uint32_t PackSpriteSheet::UploadData(GLViewWidget *gl, void ** sprites, uint32_t
 		{
 			glm::u16vec4 coords = glm::u16vec4(positions[i], sizes[i].x, sizes[i].y);
 
-			std::cerr << "AABB[" << i << "] = {" << coords.x << ", " << coords.y << ", " << coords.z  << ", " << coords.w  << "}" << std::endl;
+//			std::cerr << "AABB[" << i << "] = {" << coords.x << ", " << coords.y << ", " << coords.z  << ", " << coords.w  << "}" << std::endl;
 
 			assert( coords.x + coords.z < size.x && coords.y + coords.w < size.y);
 			assert(size.x > 0 && size.y > 0);

@@ -50,6 +50,8 @@ int32_t PackMemo::PackIndices(uint16_t * ptr, uint32_t size, bool take_memory)
 	accessor.componentType  = ComponentType::UnsignedShort;
 	accessor.count			= size;
 
+	assert(accessor.count != 0);
+
 	r = m_accessors.size();
 	m_accessors.push_back(std::move(accessor));
 
@@ -75,6 +77,8 @@ int32_t PackMemo::PackAccessor(const void * ptr, uint32_t size, ComponentType co
 	accessor.normalize		= normalize;
 	accessor.componentType  = component_type;
 	accessor.count			= size;
+
+	assert(accessor.count != 0);
 
 	r = m_accessors.size();
 	m_accessors.push_back(std::move(accessor));
@@ -182,6 +186,8 @@ void PackMemo::PackDocument(Sprites::Document & doc)
 		a.normalized	= acc.normalize;
 		a.componentType = acc.componentType;
 		a.type			= acc.type;
+
+		assert(a.count != 0);
 
 		GetMinMax(m_accessors[i], a.min, a.max);
 		doc.accessors.push_back(std::move(a));

@@ -463,11 +463,16 @@ void MainWindow::ImportSprite()
 
 		auto image = Image::Factory(document->imageManager, path);
 
+		ui->viewWidget->makeCurrent();
+		assert(ui->viewWidget->isValid());
+
 		auto command  = std::make_unique<ObjectCommand>(document.get(), document->objects.size(), image->getFilename());
 		auto material = command->GetObject().get()->material.get();
 		material->ext.unlit.is_empty = false;
 		material->SetImage(image, &material->image_slots[(int)Material::Tex::BaseColor]);
 		material->Prepare(ui->viewWidget);
+
+		ui->viewWidget->doneCurrent();
 
 		document->addCommand(std::move(command));
 	}

@@ -25,6 +25,8 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 	template<int S, typename T, glm::qualifier Q>
 	int32_t PackAccessor(glm::vec<S, T, Q> const* array, uint32_t length, bool normalize, bool take_memory)
 	{
+		if(length == 0) return -1;
+
 		static_assert(ComponentTypeId<T>::ComponentType != 0, "unidentified component type");
 
 		auto itr = m_knownAccessors.find(array);
@@ -46,6 +48,8 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 	template<typename T>
 	int32_t PackAccessor(T * const& array, uint32_t length, bool normalize, bool take_memory)
 	{
+		if(length == 0) return -1;
+
 		static_assert(std::is_fundamental<T>::value);
 		static_assert(ComponentTypeId<T>::ComponentType != 0, "unidentified component type");
 

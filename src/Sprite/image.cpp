@@ -174,6 +174,8 @@ bool Image::LoadFromFile()
 		IO::DownloadImage(gl, &image, m_texture, -1, -1, GL_UNSIGNED_BYTE);
 	}
 
+	assert(m_texture != 0);
+
 	m_hasAlpha = Qt_to_Gl::HasAlpha(image.internalFormat);
 	m_texCoords = ImageTextureCoordinates::Factory(image, spritesFromSheet);
 

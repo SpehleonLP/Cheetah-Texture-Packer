@@ -169,88 +169,81 @@ void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, ConstSizedArray<T> 
 	_gl glBufferData(type, array.size() * sizeof(array[0]), array.data(), GL_DYNAMIC_DRAW); DEBUG_GL
 };
 
-void Material::CreateDefaultArrays(GLViewWidget* gl)
+template<typename T, typename Function>
+CountedSizedArray<T>  CreateArray(size_t length, Function func)
 {
-	if(!m_normalizedPositions.empty() || m_spriteCount == 0)
-		return;
+	CountedSizedArray<T> r(length);
 
-	_gl glBindVertexArray(m_vao); DEBUG_GL
+	for(auto i = 0u; i < r.size(); ++i)
+		r[i] = func(i);
 
-	m_normalizedPositions = CountedSizedArray<glm::vec2>(m_spriteCount * 4);
-	m_spriteIndices       = CountedSizedArray<Pair>(m_spriteCount);
-	m_spriteVertices      = CountedSizedArray<Pair>(m_spriteCount);
+	return r;
+}
 
-	for(uint32_t i = 0; i < m_spriteCount; ++i)
-		m_spriteIndices[i] = {(uint16_t)(i*6), 6};
+std::vector<uint16_t>  CreateSquareIndices(size_t length)
+{
+	std::vector<uint16_t> indices(length*6);
 
-	for(uint32_t i = 0; i < m_spriteCount; ++i)
-		m_spriteVertices[i] = {(uint16_t)(i*4), 4};
+	for(uint32_t i = 0; i < length; ++i)
+	{
+		indices[i*6+0] = i*4+0;
+		indices[i*6+1] = i*4+1;
+		indices[i*6+2] = i*4+3;
+
+		indices[i*6+3] = i*4+3;
+		indices[i*6+4] = i*4+1;
+		indices[i*6+5] = i*4+2;
+	}
+
+	return indices;
+}
+
+
+ConstSizedArray<glm::vec2>  Material::CreateNormalizedPositions() const
+{
+	CountedSizedArray<glm::vec2> r(m_spriteCount * 4);
 
 	auto m_sprites = m_texCoords->sprites();
 	auto m_crop   = m_texCoords->sprites();
 
 	for(uint32_t i = 0; i < m_spriteCount; ++i)
 	{
-#if 1
 		glm::vec2 center = SpriteSheet::GetCenter(m_sprites[i]);
 		glm::vec4 sprite = glm::vec4(m_sprites[i]) - glm::vec4(center, center);
 		glm::vec4 crop   = glm::vec4(m_crop   [i]) - glm::vec4(center, center);
 		glm::vec4 result = crop / glm::abs(sprite);
 
-		m_normalizedPositions[i*4+0] = glm::vec2(result.x, result.y);
-		m_normalizedPositions[i*4+1] = glm::vec2(result.z, result.y);
-		m_normalizedPositions[i*4+2] = glm::vec2(result.z, result.w);
-		m_normalizedPositions[i*4+3] = glm::vec2(result.x, result.w);
-#else
-		m_normalizedPositions[i*4+0] = glm::vec2(-1.f,  1.f);
-		m_normalizedPositions[i*4+1] = glm::vec2( 1.f,  1.f);
-		m_normalizedPositions[i*4+2] = glm::vec2( 1.f, -1.f);
-		m_normalizedPositions[i*4+3] = glm::vec2(-1.f, -1.f);
-#endif
+		r[i*4+0] = glm::vec2(result.x, result.y);
+		r[i*4+1] = glm::vec2(result.z, result.y);
+		r[i*4+2] = glm::vec2(result.z, result.w);
+		r[i*4+3] = glm::vec2(result.x, result.w);
 	}
 
-	CreateIdBuffer(gl);
-
-	{
-		std::vector<uint16_t> indices(m_spriteCount*6);
-
-		for(uint32_t i = 0; i < m_spriteCount; ++i)
-		{
-			indices[i*6+0] = i*4+0;
-			indices[i*6+1] = i*4+1;
-			indices[i*6+2] = i*4+3;
-
-			indices[i*6+3] = i*4+3;
-			indices[i*6+4] = i*4+1;
-			indices[i*6+5] = i*4+2;
-		}
-
-		_gl glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vbo[v_indices]); DEBUG_GL
-		_gl glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_DYNAMIC_DRAW); DEBUG_GL
-	}
-
-//create null textures
-	{
-		std::unique_ptr<uint8_t[], void (*)(void*)> ptr((uint8_t*)calloc(m_spriteCount * 4, sizeof(glm::u16vec4)), &std::free);
-
-		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[v_texCoord]); DEBUG_GL
-		_gl glBufferData(GL_ARRAY_BUFFER, m_spriteCount * 4 * sizeof(glm::u16vec4), &ptr[0], GL_DYNAMIC_DRAW); DEBUG_GL
-
-		for(uint32_t i = v_sheetCoordBegin; i < v_sheetCoordEnd; ++i)
-		{
-			_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[i]); DEBUG_GL
-			_gl glBufferData(GL_ARRAY_BUFFER, m_spriteCount * 4 * sizeof(glm::vec2), &ptr[0], GL_DYNAMIC_DRAW); DEBUG_GL
-		}
-	}
-
-//create positions
-	_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[v_positions]); DEBUG_GL
-	_gl glBufferData(GL_ARRAY_BUFFER, m_normalizedPositions.size() * sizeof(m_normalizedPositions[0]), &m_normalizedPositions[0], GL_DYNAMIC_DRAW); DEBUG_GL
+	return r;
 }
 
-void Material::CreateIdBuffer(GLViewWidget* gl)
+
+
+template<typename T>
+void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, std::vector<T> const& vec, GLenum draw_type)
 {
-	std::vector<short> array(m_normalizedPositions.size(), 0);
+	_gl glBindBuffer(type, vbo); DEBUG_GL
+	_gl glBufferData(type, vec.size() * sizeof(T), vec.data(), draw_type);
+	DEBUG_GL
+}
+
+
+template<typename T>
+void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, ConstSizedArray<T> const& vec, GLenum draw_type)
+{
+	_gl glBindBuffer(type, vbo); DEBUG_GL
+	_gl glBufferData(type, vec.size() * sizeof(T), vec.data(), draw_type);
+	DEBUG_GL
+}
+
+std::vector<short> Material::CreateIdBuffer() const
+{
+	std::vector<short> array(m_spriteVertices.back().end(), 0);
 
 	for(uint32_t i = 0; i < m_spriteCount; ++i)
 	{
@@ -262,9 +255,49 @@ void Material::CreateIdBuffer(GLViewWidget* gl)
 		}
 	}
 
-	_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[v_spriteId]); DEBUG_GL
-	_gl glBufferData(GL_ARRAY_BUFFER, array.size() * sizeof(array[0]), &array[0], GL_DYNAMIC_DRAW); DEBUG_GL
+	return array;
 }
+
+
+void Material::CreateDefaultArrays(GLViewWidget* gl)
+{
+	if(!m_normalizedPositions.empty() || m_spriteCount == 0)
+		return;
+
+	m_normalizedPositions = CreateNormalizedPositions();
+	m_spriteIndices   = CreateArray<Pair>(m_spriteCount, [](uint16_t i) { return Pair{(uint16_t)(i*6), 6}; });
+	m_spriteVertices  = CreateArray<Pair>(m_spriteCount, [](uint16_t i) { return Pair{(uint16_t)(i*4), 4}; });
+
+	_gl glBindVertexArray(m_vao); DEBUG_GL
+
+//	v_sheetCoordBegin,
+//	v_sheetCoordEnd = v_sheetCoordBegin + (int)Tex::Total,
+
+//create null textures
+	{
+		std::unique_ptr<uint8_t[], void (*)(void*)> ptr((uint8_t*)calloc(m_spriteCount * 4 * sizeof(glm::u16vec4), 1), &std::free);
+
+//	v_texCoord,
+		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[v_texCoord]); DEBUG_GL
+		_gl glBufferData(GL_ARRAY_BUFFER, m_spriteCount * 4 * sizeof(glm::u16vec4), &ptr[0], GL_DYNAMIC_DRAW); DEBUG_GL
+
+		for(uint32_t i = v_sheetCoordBegin; i < v_sheetCoordEnd; ++i)
+		{
+			_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[i]); DEBUG_GL
+			_gl glBufferData(GL_ARRAY_BUFFER, m_spriteCount * 4 * sizeof(glm::vec2), &ptr[0], GL_DYNAMIC_DRAW); DEBUG_GL
+		}
+	}
+
+//	v_positions = v_sheetCoordEnd,
+	UploadData(gl, GL_ARRAY_BUFFER, m_vbo[v_positions],  m_normalizedPositions, GL_DYNAMIC_DRAW);
+//v_spriteId,
+	UploadData(gl, GL_ARRAY_BUFFER, m_vbo[v_spriteId],  CreateIdBuffer(), GL_DYNAMIC_DRAW);
+
+//	v_indices,
+	UploadData(gl, GL_ELEMENT_ARRAY_BUFFER, m_vbo[v_indices], CreateSquareIndices(m_spriteCount), GL_DYNAMIC_DRAW);
+
+}
+
 
 void Material::Prepare(GLViewWidget* gl)
 {
@@ -274,6 +307,11 @@ void Material::Prepare(GLViewWidget* gl)
 	{
 		_gl glGenVertexArrays(1, &m_vao);
 		_gl glGenBuffers(VBOc, &m_vbo[0]);
+
+		if(!m_vao)
+			return;
+
+		DEBUG_GL;
 
 //sprite sheet
 		_gl glBindVertexArray(m_vao);
@@ -311,8 +349,6 @@ void Material::Prepare(GLViewWidget* gl)
 
 	if(m_dirtyTextureFlags || created)
 	{
-		CreateDefaultArrays(gl);
-
 		auto flags = m_dirtyTextureFlags;
 		m_dirtyTextureFlags = 0;
 
@@ -376,6 +412,8 @@ void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
 	auto db = GetRenderData(frame);
 	RenderSheetBackdrop(gl, db);
 
+	if(m_vao == 0) return;
+
 	_gl glBindVertexArray(m_vao);
 
 	//draw sprites
@@ -386,7 +424,7 @@ void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
 
 	gltfMetallicRoughness::Shader.bindLayer(gl, 4);
 	gltfMetallicRoughness::Shader.bindCenter(gl, db.center);
-
+/*
 	for(int i = 0; i < (int)Tex::Total; ++i)
 	{
 		_gl glActiveTexture(GL_TEXTURE0 + i);
@@ -399,7 +437,7 @@ void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
 		{
 			_gl glBindTexture(GL_TEXTURE_2D, 0);
 		}
-	}
+	}*/
 
 	_gl glDisable(GL_DEPTH_TEST);
 	_gl glDrawElements(GL_TRIANGLES, db.elements, GL_UNSIGNED_SHORT, db.offset());
@@ -433,6 +471,8 @@ void Material::RenderSpriteSheet(GLViewWidget * gl, Material::Tex image_slot, in
 	Prepare(gl);
 	auto db = GetRenderData(frame);
 	RenderSheetBackdrop(gl, db);
+
+	if(m_vao == 0) return;
 
 	_gl glBindVertexArray(m_vao);
 

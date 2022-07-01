@@ -3,6 +3,8 @@
 #include "super_xbr.h"
 #include "widgets/glviewwidget.h"
 #include <stdexcept>
+#include <QProgressDialog>
+#include <QCoreApplication>
 #include <vector>
 
 static
@@ -19,7 +21,7 @@ void xBrLoop(std::vector<uint32_t> & pixel_data, int & width, int & height)
 }
 
 
-SpriteFile double_image(SpriteFile const& image)
+SpriteFile double_image(SpriteFile const& image, QWidget * parent)
 {
 	if(image.format != GL_RGBA
 	|| image.type   != GL_UNSIGNED_BYTE)
@@ -48,10 +50,16 @@ SpriteFile double_image(SpriteFile const& image)
 		size += r.sizes[i].x * r.sizes[i].y;
 	}
 
-	for(uint32_t i = 0; i < 1; ++i)
+	QProgressDialog dialog("Upscaling Sprite...", "Cannot Cancel", 0, r.count, parent);
+
+	for(uint32_t i = 0; i < r.count; ++i)
 	{
+		dialog.setValue(i+1);
 		scaleSuperXbr((uint32_t*)image.pointers[i], (uint32_t*)r.pointers[i], image.sizes[i].x, image.sizes[i].y);
+		QCoreApplication::processEvents();
 	}
+
+	dialog.close();
 
 	return r;
 }
