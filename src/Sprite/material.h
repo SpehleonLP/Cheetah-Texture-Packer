@@ -145,6 +145,7 @@ typedef std::array<counted_ptr<Image>, (int)Tex::Total>						ImageSlot_t;
 
 private:
 	void CreateDefaultArrays(GLViewWidget* gl);
+	void InitializeTexCoords();
 
 	std::vector<short> CreateIdBuffer() const;
 	void CreatePositionsFromNormalizedPositions(GLViewWidget * gl);

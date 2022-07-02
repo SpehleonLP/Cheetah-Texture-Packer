@@ -18,13 +18,7 @@
 
 Material::Material()
 {
-	pbrMetallicRoughness.baseColorTexture.texCoord = 2 + (int)Tex::BaseColor;
-	ext.pbrSpecularGlossiness.diffuseTexture.texCoord  = 2 + (int)Tex::Diffuse;
-	pbrMetallicRoughness.metallicRoughnessTexture.texCoord = 2 + (int)Tex::MetallicRoughness;
-	ext.pbrSpecularGlossiness.specularGlossinessTexture.texCoord = 2 + (int)Tex::SpecularGlossiness;
-	normalTexture.texCoord    = 2 + (int)Tex::Normal;
-	occlusionTexture.texCoord = 2 + (int)Tex::Occlusion;
-	emissiveTexture.texCoord  = 2 + (int)Tex::Emission;
+	InitializeTexCoords();
 }
 
 Material::Material(ImageManager * manager, Sprites::Sprite const& spr, Sprites::Document const& doc, UnpackMemo & memo) :
@@ -44,9 +38,22 @@ Material::Material(ImageManager * manager, Sprites::Sprite const& spr, Sprites::
 	UnpackImage(normalTexture, Tex::Normal);
 	UnpackImage(occlusionTexture, Tex::Occlusion);
 	UnpackImage(emissiveTexture, Tex::Emission);
+
+	InitializeTexCoords();
 }
 
 Material::~Material() {}
+
+void Material::InitializeTexCoords()
+{
+	pbrMetallicRoughness.baseColorTexture.texCoord = 2 + (int)Tex::BaseColor;
+	ext.pbrSpecularGlossiness.diffuseTexture.texCoord  = 2 + (int)Tex::Diffuse;
+	pbrMetallicRoughness.metallicRoughnessTexture.texCoord = 2 + (int)Tex::MetallicRoughness;
+	ext.pbrSpecularGlossiness.specularGlossinessTexture.texCoord = 2 + (int)Tex::SpecularGlossiness;
+	normalTexture.texCoord    = 2 + (int)Tex::Normal;
+	occlusionTexture.texCoord = 2 + (int)Tex::Occlusion;
+	emissiveTexture.texCoord  = 2 + (int)Tex::Emission;
+}
 
 void Material::Clear(GLViewWidget * gl)
 {

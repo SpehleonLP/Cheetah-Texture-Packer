@@ -79,7 +79,9 @@ std::unique_ptr<Document> Document::OpenFile(GLViewWidget * gl, QFileInfo const&
 	try
 	{
 		auto std_path = path.filePath().toStdString();
+		gl->makeCurrent();
 		r.reset(new Document(gl, Sprites::LoadFromBinary(std_path, false), std_path));
+		gl->doneCurrent();
 	}
 	catch(std::exception & e)
 	{

@@ -13,9 +13,13 @@ PackMemo::BufferPtr::BufferPtr(BufferPtr && it)
 int32_t PackMemo::PackBufferView(uint8_t * ptr, uint32_t size, bool take_memory)
 {
 	BufferPtr buffer;
-	buffer.data = ptr;
-	buffer.size = size;
-	buffer.ownsData = take_memory;
+	buffer.data			= ptr;
+	buffer.count		= 0;
+	buffer.byteLength	= size;
+	buffer.byteStride	= 0;
+	buffer.interleaved	= false;
+	buffer.ownsData     = take_memory;
+	buffer.targetType	= TargetType::None;
 
 	int r = m_buffers.size();
 	m_buffers.push_back(std::move(buffer));
@@ -35,22 +39,26 @@ void PackMemo::InterlaceBuffers(std::unique_ptr<uint32_t[]> array, uint32_t size
 int32_t PackMemo::PackIndices(uint16_t * ptr, uint32_t size, bool take_memory)
 {
 	BufferPtr buffer;
-	buffer.data = (uint8_t*)ptr;
-	buffer.size = size * 2;
-	buffer.ownsData = take_memory;
-	buffer.targetType = TargetType::ElementArrayBuffer;
+	buffer.data			= (uint8_t*)ptr;
+	buffer.count		= size;
+	buffer.byteLength	= size * sizeof(*ptr);
+	buffer.byteStride	= 0;
+	buffer.interleaved	= false;
+	buffer.ownsData     = take_memory;
+	buffer.targetType	= TargetType::ElementArrayBuffer;
 
 	int r = m_buffers.size();
 	m_buffers.push_back(std::move(buffer));
 
 	AccessorMemo accessor;
 
-	accessor.bufferId		= r;
+	accessor.bufferView		= r;
 	accessor.type			= Type::Scalar;
 	accessor.componentType  = ComponentType::UnsignedShort;
 	accessor.count			= size;
 
 	assert(accessor.count != 0);
+	assert(accessor.bufferView >= 0);
 
 	r = m_accessors.size();
 	m_accessors.push_back(std::move(accessor));
@@ -59,26 +67,30 @@ int32_t PackMemo::PackIndices(uint16_t * ptr, uint32_t size, bool take_memory)
 
 }
 
-int32_t PackMemo::PackAccessor(const void * ptr, uint32_t size, ComponentType component_type, Type type, bool normalize, bool take_memory)
+int32_t PackMemo::PackAccessor(const void * ptr, uint32_t size, uint32_t elementSize, ComponentType component_type, Type type, bool normalize, bool take_memory)
 {
 	BufferPtr buffer;
-	buffer.data = (uint8_t*)ptr;
-	buffer.size = size * 2;
-	buffer.ownsData = take_memory;
-	buffer.targetType = TargetType::ElementArrayBuffer;
+	buffer.data			= (uint8_t*)ptr;
+	buffer.count		= size;
+	buffer.byteLength	= size * elementSize;
+	buffer.byteStride	= 0;
+	buffer.interleaved	= false;
+	buffer.ownsData     = take_memory;
+	buffer.targetType	= TargetType::ArrayBuffer;
 
 	int r = m_buffers.size();
 	m_buffers.push_back(std::move(buffer));
 
 	AccessorMemo accessor;
 
-	accessor.bufferId		= r;
+	accessor.bufferView		= r;
 	accessor.type			= type;
 	accessor.normalize		= normalize;
 	accessor.componentType  = component_type;
 	accessor.count			= size;
 
 	assert(accessor.count != 0);
+	assert(accessor.bufferView >= 0);
 
 	r = m_accessors.size();
 	m_accessors.push_back(std::move(accessor));
@@ -101,15 +113,16 @@ void PackMemo::PackDocument(Sprites::Document & doc)
 
 		fx::gltf::BufferView view;
 
+		buf.bufferView = doc.bufferViews.size();
+
 		view.buffer		= 0;
 		view.byteOffset = doc.buffers[0].data.size();
 		view.byteOffset += ((view.byteOffset % 4) != 0) * (4 - (view.byteOffset % 4));
 
-		view.byteLength = buf.size;
-		view.byteStride = 0;
+		view.byteLength = buf.byteLength;
+		view.byteStride = buf.byteStride;
 
 		view.target     = buf.targetType;
-
 
 		doc.bufferViews.push_back(view);
 
@@ -135,21 +148,21 @@ void PackMemo::PackDocument(Sprites::Document & doc)
 		for(uint32_t j = 0; j < m_memo[i].length; ++j)
 		{
 			auto & acc = m_accessors[m_memo[i].accessors[j]];
-			auto & buf = m_buffers[acc.bufferId];
+			auto & buf = m_buffers[acc.bufferView];
 
-			assert(buf.bufferViewId == -1);
+			assert(buf.bufferView == -1);
 
-			buf.bufferViewId = view_id;
+			buf.bufferView   = view_id;
 			acc.byteOffset   = view.byteStride;
 
-			view.byteStride += buf.stride;
-			view.byteLength += buf.stride * buf.size;
+			view.byteStride += buf.byteStride;
+			view.byteLength += buf.byteStride * buf.count;
 
 			if(total_items < 0)
-				total_items = buf.size;
+				total_items = buf.count;
 			else
 			{
-				assert(total_items == (int)buf.size);
+				assert(total_items == (int)buf.count);
 			}
 		}
 
@@ -164,10 +177,10 @@ void PackMemo::PackDocument(Sprites::Document & doc)
 			for(uint32_t j = 0; j < m_memo[i].length; ++j)
 			{
 				auto & acc = m_accessors[m_memo[i].accessors[j]];
-				auto & buf = m_buffers[acc.bufferId];
+				auto & buf = m_buffers[acc.bufferView];
 
-				memcpy(begin, buf.data + k * buf.stride, buf.stride);
-				begin += buf.stride;
+				memcpy(begin, buf.data + k * buf.byteStride, buf.byteStride);
+				begin += buf.byteStride;
 			}
 		}
 	}
@@ -176,11 +189,11 @@ void PackMemo::PackDocument(Sprites::Document & doc)
 	for(uint32_t i = 0; i < m_accessors.size(); ++i)
 	{
 		auto & acc = m_accessors[i];
-		auto & buf = m_buffers[acc.bufferId];
+		auto & buf = m_buffers[acc.bufferView];
 
 		fx::gltf::Accessor a;
 
-		a.bufferView	= buf.bufferViewId;
+		a.bufferView	= buf.bufferView;
 		a.byteOffset	= acc.byteOffset;
 		a.count			= acc.count;
 		a.normalized	= acc.normalize;
@@ -188,6 +201,7 @@ void PackMemo::PackDocument(Sprites::Document & doc)
 		a.type			= acc.type;
 
 		assert(a.count != 0);
+		assert(a.bufferView >= 0);
 
 		GetMinMax(m_accessors[i], a.min, a.max);
 		doc.accessors.push_back(std::move(a));
@@ -274,14 +288,14 @@ typedef fx::gltf::Accessor::Type k;
 
 void PackMemo::GetMinMax(AccessorMemo const& memo, std::vector<float> & min, std::vector<float> & max)
 {
-	auto & buf = m_buffers[memo.bufferId];
+	auto & buf = m_buffers[memo.bufferView];
 
 	return MinMaxTrampoline1(
 		memo.type,
 		memo.componentType,
 		buf.data,
-		buf.size,
-		buf.stride,
+		buf.count,
+		buf.byteStride,
 		&min,
 		&max);
 }

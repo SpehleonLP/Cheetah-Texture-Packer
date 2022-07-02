@@ -506,11 +506,11 @@ IO::Image IO::LoadImage(QImage && qimage)
 			| Qt::DiffuseAlphaDither
 			| Qt::PreferDither);
 
-	image.size = glm::i16vec2(qimage.width(), qimage.height());
+	image.size			 = glm::i16vec2(qimage.width(), qimage.height());
 	image.format         = Qt_to_Gl::GetFormat(format);
 	image.internalFormat = Qt_to_Gl::GetInternalFormat(format);
 	image.type           = Qt_to_Gl::GetType(format);
-	image.bytes          = image.size.y*qimage.bytesPerLine();
+	image.bytes          = qimage.sizeInBytes();
 	image.hasAlpha       = uses_alpha;
 
 	image.image.reset(new uint8_t[image.bytes]);

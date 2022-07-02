@@ -130,6 +130,8 @@ void GLViewWidget::initializeGL()
 		QOpenGLFunctions_3_3_Core::initializeOpenGLFunctions();
 	}
 
+	makeCurrent();
+
     glClearColor(0, 0, 0, 1);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);

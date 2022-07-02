@@ -39,19 +39,24 @@ Image::Image(counted_ptr<ImageManager> manager, const ImageKey & key, IO::Image 
 	TransparencyShader::Shader.AddRef();
 	UnlitShader::Shader.AddRef();
 
-	m_ownsTexture = true;
-	m_size      = image.size;
-	m_channels  = Qt_to_Gl::GetChannelsFromFormat(image.format);
-	m_hasAlpha = Qt_to_Gl::HasAlpha(image.internalFormat);
+	m_size			= image.size;
+	m_channels		= Qt_to_Gl::GetChannelsFromFormat(image.format);
+
+	m_hasAlpha		= Qt_to_Gl::HasAlpha(image.internalFormat);
+	m_isLoaded		= true;
+	m_ownsTexture	= true;
 
 	IO::UploadImage(manager->GetGL(), &m_texture, &image.image[0], image.size, image.internalFormat, image.format, image.type);
 
-	if(image.type != GL_UNSIGNED_BYTE)
+	if(m_texCoords.empty())
 	{
-		IO::DownloadImage(manager->GetGL(), &image, m_texture, -1, -1, GL_UNSIGNED_BYTE);
-	}
+		if(image.type != GL_UNSIGNED_BYTE)
+		{
+			IO::DownloadImage(manager->GetGL(), &image, m_texture, -1, -1, GL_UNSIGNED_BYTE);
+		}
 
-	m_texCoords = ImageTextureCoordinates::Factory(image, {});
+		m_texCoords = ImageTextureCoordinates::Factory(image, {});
+	}
 }
 
 

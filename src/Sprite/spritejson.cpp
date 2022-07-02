@@ -138,6 +138,12 @@ void to_json(nlohmann::json & json, Sprite const& db)
 void from_json(nlohmann::json const & json, Document & db)
 {
 	ReadRequiredField("asset",          json, db.asset);
+
+	if(std::stof(db.asset.version) <= 2.0)
+	{
+		throw std::runtime_error("asset.version too low for this version of sprite builder.");
+	}
+
 	ReadOptionalField("sprites",        json, db.sprites);
 
 	ReadOptionalField("accessors",      json, db.accessors);
@@ -149,6 +155,8 @@ void from_json(nlohmann::json const & json, Document & db)
 	ReadOptionalField("images",         json, db.images);
 	ReadOptionalField("samplers",       json, db.samplers);
 
+	ReadOptionalField("texCoords",      json, db.texCoords);
+
 	ReadOptionalField("extensionsUsed", json, db.extensionsUsed);
 	ReadOptionalField("extensionsRequired", json, db.extensionsRequired);
 
@@ -157,7 +165,10 @@ void from_json(nlohmann::json const & json, Document & db)
 
 void to_json(nlohmann::json & json, Document const& db)
 {
-	WriteQuick("asset",          json, db.asset);
+	auto asset = db.asset;
+	asset.version = "2.01";
+
+	WriteQuick("asset",          json, asset);
 	WriteQuick("sprites",        json, db.sprites);
 
 	WriteQuick("accessors",      json, db.accessors);

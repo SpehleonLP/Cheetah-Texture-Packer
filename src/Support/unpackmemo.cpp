@@ -15,10 +15,10 @@ counted_ptr<Image> UnpackMemo::UnpackImage(ImageManager * manager, UnpackMemo & 
 	auto & texture = doc.textures[_texture.index];
 
 	if((uint32_t)texture.source >= doc.images.size())
-		return {};
+		throw std::out_of_range("texture.source");
 
 	if((uint32_t)texture.texCoords >= doc.texCoords.size())
-		return {};
+		throw std::out_of_range("texture.texCoords");
 
 	ImageKey key(memo.documentFilePath, texture.source);
 

@@ -36,7 +36,7 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 
 
 		auto value = PackAccessor(
-			(void*)array, length,
+			(void*)array, length, sizeof(glm::vec<S, T, Q>),
 			(ComponentType)ComponentTypeId<T>::ComponentType,
 			(Type)S,
 			normalize, take_memory);
@@ -59,7 +59,7 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 			return itr->second;
 
 		auto value = PackAccessor(
-			(void*)array, length,
+			(void*)array, length, sizeof(T),
 			(ComponentType)ComponentTypeId<T>::ComponentType,
 			(Type)1,
 			normalize, take_memory);
@@ -74,7 +74,7 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 
 	template<typename T>
 	int32_t PackAccessor(ConstSizedArray<T> const& array, bool normalize = false)
-		{ return PackAccessor<T>(array.data(), array.size(), normalize, false); }
+		{ return PackAccessor<T>(array.data(), array.size(), sizeof(T), normalize, false); }
 
 	template<int S, typename T, glm::qualifier Q>
 	int32_t PackAccessor(std::vector<glm::vec<S, T, Q>> const& array, bool normalize = false)
@@ -82,9 +82,9 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 
 	template<typename T>
 	int32_t PackAccessor(std::vector<T> const& array, bool normalize = false)
-		{ return PackAccessor<T>(array.data(), array.size(), normalize, false); }
+		{ return PackAccessor<T>(array.data(), array.size(), sizeof(T), normalize, false); }
 
-	int32_t PackAccessor(void const* array, uint32_t length, ComponentType, Type, bool normalize, bool take_memory);
+	int32_t PackAccessor(void const* array, uint32_t length, uint32_t elementSize, ComponentType, Type, bool normalize, bool take_memory);
 
 	struct BufferPtr
 	{
@@ -97,9 +97,10 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 		bool operator!=(BufferPtr const& it) const { return !(*this == it); }
 
 		uint8_t const* data{};
-		uint32_t size{};
-		uint16_t stride{};
-		int32_t  bufferViewId{-1};
+		uint32_t count{};
+		uint32_t byteLength{};
+		int32_t  bufferView{-1};
+		uint16_t byteStride{};
 		bool	 interleaved{};
 		bool	 ownsData{};
 		TargetType    targetType{};
@@ -110,7 +111,7 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 		bool operator==(AccessorMemo const&) const;
 		bool operator!=(AccessorMemo const& it) const { return !(*this == it); }
 
-		int32_t		  bufferId{};
+		int32_t		  bufferView{};
 		Type		  type{Type::None};
 		bool		  normalize{};
 		ComponentType componentType{ComponentType::None};
