@@ -432,19 +432,29 @@ std::string MainWindow::GetImage()
 
 std::string MainWindow::GetSpritePath()
 {
+#ifndef _WIN32
+	if(defaultSpritePath.isEmpty())
+	{
+		defaultSpritePath = "/mnt/Passport/Programs/Cheetah-Texture-Packer/Cheeta-Texture-Packer/test-images";
+	}
+#endif
+
 	GLViewWidget::TimerState pause_timer(ui->viewWidget);
 
     QFileDialog dialog(this, tr("Open Sprite"));
 
     initializeSpriteFileDialog(dialog, QFileDialog::AcceptOpen);
 
-#ifndef _WIN32
-	dialog.setDirectory("/mnt/Passport/Programs/Cheetah-Texture-Packer/Cheeta-Texture-Packer/test-images");
-#endif
+	if(!defaultSpritePath.isEmpty())
+		dialog.setDirectory(defaultSpritePath);
 
     if(dialog.exec() == QDialog::Accepted)
 	{
-		return dialog.selectedFiles().first().toStdString();
+		auto path = dialog.selectedFiles().first();
+
+		defaultSpritePath = QFileInfo(path).dir().path();
+
+		return path.toStdString();
 	}
 
 	return std::string();

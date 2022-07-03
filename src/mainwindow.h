@@ -89,6 +89,7 @@ private:
 
 	void RecurseDirectory(const QString &dir);
 	QString topImageDir;
+	QString defaultSpritePath;
 
 	bool exporting{};
 	bool m_asterisk{};
