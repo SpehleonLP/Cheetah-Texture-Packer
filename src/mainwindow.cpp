@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     exporting = false;
     ui->setupUi(this);
-	ui->viewWidget->w = this;
+	ui->viewWidget->SetMainWindow(this);
 
 	prefs = new SettingsPanel(*this);
 
@@ -200,7 +200,7 @@ static QDir g_sprFilePath = QDir::home();
 
 bool MainWindow::fileOpen()
 {
-	GLViewWidget::TimerState pause_timer(ui->viewWidget);
+	auto pause_timer = CountedWrap(ui->viewWidget);
 
 	QFileDialog dialog(this, tr("Save Sprite File"));
 	dialog.setAcceptMode(QFileDialog::AcceptOpen);
@@ -236,7 +236,7 @@ bool MainWindow::fileSave()
 
 bool MainWindow::fileSaveAs()
 {
-	GLViewWidget::TimerState pause_timer(ui->viewWidget);
+	counted_ptr ptr = CountedWrap(ui->viewWidget);
 
 	QFileDialog dialog(this, tr("Save Sprite File"));
 	dialog.setAcceptMode(QFileDialog::AcceptSave);
@@ -375,7 +375,7 @@ static void initializeSpriteFileDialog(QFileDialog &dialog, QFileDialog::AcceptM
 #endif
 std::string MainWindow::GetImage()
 {
-	GLViewWidget::TimerState pause_timer(ui->viewWidget);
+	counted_ptr ptr = CountedWrap(ui->viewWidget);
 
     QFileDialog dialog(this, tr("Open File"));
 
@@ -439,7 +439,7 @@ std::string MainWindow::GetSpritePath()
 	}
 #endif
 
-	GLViewWidget::TimerState pause_timer(ui->viewWidget);
+	counted_ptr ptr = CountedWrap(ui->viewWidget);
 
     QFileDialog dialog(this, tr("Open Sprite"));
 
@@ -476,7 +476,7 @@ void MainWindow::ImportSprite()
 		ui->viewWidget->makeCurrent();
 		assert(ui->viewWidget->isValid());
 
-		auto command  = std::make_unique<ObjectCommand>(document.get(), document->objects.size(), image->getFilename());
+		auto command  = std::make_unique<ObjectCommand>(document.get(), document->objects.size(), std::string(image->getFilename()));
 		auto material = command->GetObject().get()->material.get();
 		material->ext.unlit.is_empty = false;
 		material->SetImage(image, &material->image_slots[(int)Material::Tex::BaseColor]);

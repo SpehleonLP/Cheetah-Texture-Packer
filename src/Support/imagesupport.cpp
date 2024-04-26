@@ -26,7 +26,7 @@
 
 void IO::UploadImage(GLViewWidget * gl, uint32_t * texture, uint8_t * data, glm::i16vec2 size, uint32_t internal_format, uint32_t format, uint32_t type)
 {
-	GL_ASSERT;
+	
 
 	(void)gl;
 
@@ -56,10 +56,10 @@ void IO::UploadImage(GLViewWidget * gl, uint32_t * texture, uint8_t * data, glm:
 			type,
 			&data[0]);
 
-	GL_ASSERT;
+	
 }
 
-CountedSizedArray<glm::i16vec4> IO::GetSprites(uint8_t * data, uint32_t, glm::i16vec2 size, int channels)
+shared_array<glm::i16vec4> IO::GetSprites(uint8_t * data, uint32_t, glm::i16vec2 size, int channels)
 {
 	std::vector<glm::i16vec4> r;
 
@@ -103,14 +103,14 @@ end:
 
 	std::cerr << "total sprites found: " << r.size() << std::endl;
 
-	return CountedSizedArray<glm::i16vec4>::FromArray(&r[0], r.size());
+	return shared_array<glm::i16vec4>::FromArray(&r[0], r.size());
 }
 
-CountedSizedArray<glm::i16vec4> IO::GetCrop(uint8_t * data, uint32_t data_bytes, glm::i16vec2 size, int channels, ConstSizedArray<glm::i16vec4> sprites)
+shared_array<glm::i16vec4> IO::GetCrop(uint8_t * data, uint32_t data_bytes, glm::i16vec2 size, int channels, immutable_array<glm::i16vec4> sprites)
 {
 	assert(data_bytes >= (uint32_t) (size.x * size.y * channels));
 
-	CountedSizedArray<glm::i16vec4> r(sprites.size());
+	shared_array<glm::i16vec4> r(sprites.size());
 
 	uint32_t mask = channels == 4? 0x000000FF : 0xFFFFFF00;
 
@@ -122,9 +122,9 @@ CountedSizedArray<glm::i16vec4> IO::GetCrop(uint8_t * data, uint32_t data_bytes,
 	return r;
 }
 
-CountedSizedArray<glm::u16vec4> IO::NormalizeCrop(ConstSizedArray<glm::i16vec4> sprites, glm::i16vec2 size)
+shared_array<glm::u16vec4> IO::NormalizeCrop(immutable_array<glm::i16vec4> sprites, glm::i16vec2 size)
 {
-	CountedSizedArray<glm::u16vec4> r(sprites.size());
+	shared_array<glm::u16vec4> r(sprites.size());
 
 	size = glm::max(size, glm::i16vec2(1, 1));
 
@@ -238,20 +238,20 @@ void IO::DownloadImage(GLViewWidget * gl, IO::Image * image,  uint32_t texture, 
 {
 	assert(image != nullptr);
 
-	GL_ASSERT;
+	
 	(void)gl;
 
 	if(texture == 0)
 		return;
 
 	int width{}, height{};
-	_gl glBindTexture(GL_TEXTURE_2D, texture);	GL_ASSERT;
-	_gl glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH , &width);	GL_ASSERT;
-	_gl glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);	GL_ASSERT;
+	_gl glBindTexture(GL_TEXTURE_2D, texture);	
+	_gl glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH , &width);	
+	_gl glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);	
 
 	if(internalFormat < 0)
 	{
-		_gl glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT , (int*)&internalFormat);	GL_ASSERT;
+		_gl glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT , (int*)&internalFormat);	
 	}
 
 	image->size           = glm::ivec2(width, height);
@@ -265,11 +265,11 @@ void IO::DownloadImage(GLViewWidget * gl, IO::Image * image,  uint32_t texture, 
 	image->image.reset(new uint8_t[image->bytes]);
 
 	_gl glGetTexImage(GL_TEXTURE_2D, 0, image->format, image->type, &image->image[0]);
-	GL_ASSERT;
+	
 }
 
 
-bool IO::CheckDynamics(std::string & error, float & size_ratio, ConstSizedArray<glm::i16vec4> A, ConstSizedArray<glm::i16vec4> B)
+bool IO::CheckDynamics(std::string & error, float & size_ratio, immutable_array<glm::i16vec4> A, immutable_array<glm::i16vec4> B)
 {
 	if(A == B) return true;
 
@@ -319,7 +319,7 @@ bool IO::CheckDynamics(std::string & error, float & size_ratio, ConstSizedArray<
 
 void IO::DownloadImage(GLViewWidget * gl, QImage * image,  uint32_t texture)
 {
-	GL_ASSERT;
+	
 	(void)gl;
 
 	if(texture == 0)
@@ -336,7 +336,7 @@ void IO::DownloadImage(GLViewWidget * gl, QImage * image,  uint32_t texture)
 
 	*image = QImage(ptr, width, height, 4*width, QImage::Format_ARGB32, &std::free, ptr);
 
-	GL_ASSERT;
+	
 }
 
 
@@ -663,7 +663,7 @@ void IO::SaveImage(const char * path, uint8_t * data, glm::i16vec2 size, int cha
 
 void IO::DownloadImage(GLViewWidget * gl, basisu::image & image,  uint32_t texture)
 {
-	GL_ASSERT;
+	
 	(void)gl;
 
 	if(texture == 0)
@@ -677,7 +677,7 @@ void IO::DownloadImage(GLViewWidget * gl, basisu::image & image,  uint32_t textu
 	image.resize(width, height);
 
 	_gl glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, image.get_ptr());
-	GL_ASSERT;
+	
 }
 
 #endif

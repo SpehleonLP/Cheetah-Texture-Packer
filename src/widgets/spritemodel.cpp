@@ -434,7 +434,8 @@ QVariant SpriteModel::data(const QModelIndex &index, int role) const
 			if(ptr.empty())
 				return "";
 
-			return QString::fromStdString(ptr->getFilename());
+			auto filename = ptr->getFilename();
+			return QString::fromStdString(std::string(filename));
 		}
 		default:
 			break;
@@ -828,7 +829,7 @@ Qt::ItemFlags SpriteModel::flags(QModelIndex const& index) const
 	return Qt::NoItemFlags;
 }
 
-QString SpriteModel::StringFromVector(CountedSizedArray<uint16_t> const& array)
+QString SpriteModel::StringFromVector(shared_array<uint16_t> const& array)
 {
 	QString r;
 
@@ -840,12 +841,12 @@ QString SpriteModel::StringFromVector(CountedSizedArray<uint16_t> const& array)
 	return r;
 }
 
-bool SpriteModel::VectorFromString(CountedSizedArray<uint16_t> & dst, QString const& string)
+bool SpriteModel::VectorFromString(shared_array<uint16_t> & dst, QString const& string)
 {
 	bool okay;
 
 	auto tokens = string.split(' ', Qt::SkipEmptyParts);
-	CountedSizedArray<uint16_t> eax(tokens.size());
+	shared_array<uint16_t> eax(tokens.size());
 
 	for(int i = 0; i < tokens.size(); ++i)
 	{

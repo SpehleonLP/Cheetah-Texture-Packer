@@ -85,7 +85,7 @@ std::unique_ptr<Document> Document::OpenFile(GLViewWidget * gl, QFileInfo const&
 	}
 	catch(std::exception & e)
 	{
-		QMessageBox::critical(gl->w, "Error OpeningFile File", e.what());
+		QMessageBox::critical(gl->window(), "Error OpeningFile File", e.what());
 		return nullptr;
 	}
 

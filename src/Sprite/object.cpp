@@ -37,7 +37,7 @@ Object::Object(ImageManager * gl, Sprites::Sprite const& spr, Sprites::Document 
 		r->loop_end   = spr.animations[i].loop_end;
 
 		if(!spr.animations[i].frames.empty())
-			r->frames = CountedSizedArray<uint16_t>::FromArray(
+			r->frames = shared_array<uint16_t>::FromArray(
 				&spr.animations[i].frames[0],
 				 spr.animations[i].frames.size());
 
@@ -134,10 +134,10 @@ void Object::UpdateImages(Document* doc)
 		(int)Material::Tex::None
 	};
 
-	CountedSizedArray<glm::i16vec4> positions;
-	CountedSizedArray<glm::i16vec4> crop;
-	CountedSizedArray<glm::u16vec4> normalized;
-	CountedSizedArray<glm::u16vec4> normPos;
+	shared_array<glm::i16vec4> positions;
+	shared_array<glm::i16vec4> crop;
+	shared_array<glm::u16vec4> normalized;
+	shared_array<glm::u16vec4> normPos;
 
 	for(int const* p = priority; *p != -1; ++p)
 	{
@@ -243,7 +243,7 @@ void Object::Render(GLViewWidget * gl, Material::Tex texture, int frame, int out
 	if(m_sprites.empty())
 		return;
 
-	GL_ASSERT;
+	
 
 	if(frame >= 0) frame %= m_sprites.size();
 
@@ -261,7 +261,7 @@ void Object::Render(GLViewWidget * gl, Material::Tex texture, int frame, int out
 		BlitShader::Shader.bind(gl, nullptr);
 		BlitShader::Shader.bindLayer(gl, 1);
 		BlitShader::Shader.bindCenter(gl, frame >= 0);
-		BlitShader::Shader.bindColor(gl, glm::vec4(1, 1, 0, 0));GL_ASSERT;
+		BlitShader::Shader.bindColor(gl, glm::vec4(1, 1, 0, 0));
 
 		_gl glBindVertexArray(m_vao[outline % 2]);
 		_gl glDrawArrays(GL_TRIANGLES, first, elements);
@@ -277,7 +277,7 @@ void Object::Render(GLViewWidget * gl, Material::Tex texture, int frame, int out
 			TransparencyShader::Shader.bindCenter(gl, center);
 			TransparencyShader::Shader.bindMatrix(gl, matrix);
 
-			_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);GL_ASSERT;
+			_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 		}
 
 //draw sprites boxes
@@ -286,9 +286,9 @@ void Object::Render(GLViewWidget * gl, Material::Tex texture, int frame, int out
 		BlitShader::Shader.bindMatrix(gl, matrix);
 
 		BlitShader::Shader.bindLayer(gl, 3);
-		BlitShader::Shader.bindColor(gl, glm::vec4(0, 0, 0, 0));GL_ASSERT;
+		BlitShader::Shader.bindColor(gl, glm::vec4(0, 0, 0, 0));
 
-		_gl glDrawElements(GL_TRIANGLES, elements, GL_UNSIGNED_SHORT, offset);GL_ASSERT;
+		_gl glDrawElements(GL_TRIANGLES, elements, GL_UNSIGNED_SHORT, offset);
 
 //draw sprite outlines
 		_gl glBindVertexArray(m_vao[1]);
@@ -297,16 +297,16 @@ void Object::Render(GLViewWidget * gl, Material::Tex texture, int frame, int out
 		{
 			BlitShader::Shader.bindLayer(gl, 2);
 			BlitShader::Shader.bindColor(gl, glm::vec4(1, 1, 1, 1));
-			_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);GL_ASSERT;
+			_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 		}
 
 //draw sprites
 		_gl glDisable(GL_DEPTH_TEST);
 		BlitShader::Shader.bindLayer(gl, 4);
-		BlitShader::Shader.bindTexture(gl, m_texture);GL_ASSERT;
+		BlitShader::Shader.bindTexture(gl, m_texture);
 		BlitShader::Shader.clearColor(gl);
 		_gl glDrawElements(GL_TRIANGLES, elements, GL_UNSIGNED_SHORT, offset);
 	}
-	GL_ASSERT;
+	
 }
 #endif

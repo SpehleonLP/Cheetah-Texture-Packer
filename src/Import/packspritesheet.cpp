@@ -31,7 +31,7 @@ bool IsCompressed(uint32_t u)
 	return false;
 }
 
-PackSpriteSheet::PackSpriteSheet(CountedSizedArray<glm::u16vec2> _sizes) :
+PackSpriteSheet::PackSpriteSheet(shared_array<glm::u16vec2> _sizes) :
 	sizes(std::move(_sizes))
 {
 //	uint32_t  optimal_area = SumArea(&sizes[0], sizes.size(), true);
@@ -49,7 +49,7 @@ PackSpriteSheet::PackSpriteSheet(CountedSizedArray<glm::u16vec2> _sizes) :
 	}
 
 
-	positions = CountedSizedArray<glm::u16vec2>(sizes.size());
+	positions = shared_array<glm::u16vec2>(sizes.size());
 	size      = best.size;
 
 	glm::u16vec2 row  {4, 4};
@@ -131,9 +131,9 @@ PackSpriteSheet::SheetMemo PackSpriteSheet::CreateMemo(glm::u16vec2 const* sprit
 	return { glm::u16vec2(sheet.x, sheet.y+4), std::move(row_start) };
 }
 
-CountedSizedArray<glm::i16vec4> PackSpriteSheet::BuildSprites()
+shared_array<glm::i16vec4> PackSpriteSheet::BuildSprites()
 {
-	CountedSizedArray<glm::i16vec4> r(positions.size());
+	shared_array<glm::i16vec4> r(positions.size());
 
 	for(uint32_t i = 0; i < positions.size(); ++i)
 		r[i] = glm::u16vec4(positions[i], 0, 0);
@@ -165,7 +165,7 @@ uint32_t PackSpriteSheet::UploadData(GLViewWidget *gl, void ** sprites, uint32_t
 		_gl glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 		_gl glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
-		GL_ASSERT;
+		
 
 		uint32_t N = size.x*size.y;
 		std::unique_ptr<glm::u8vec4[]> background_color(new glm::u8vec4[N]);
@@ -183,7 +183,7 @@ uint32_t PackSpriteSheet::UploadData(GLViewWidget *gl, void ** sprites, uint32_t
 			GL_UNSIGNED_BYTE,
 			&background_color[0][0]);
 
-		GL_ASSERT;
+		
 
 		bool is_compressed = IsCompressed(format);
 
@@ -217,7 +217,7 @@ uint32_t PackSpriteSheet::UploadData(GLViewWidget *gl, void ** sprites, uint32_t
 					coords.z * coords.w * compression_ratio,
 					sprites[i]);
 
-			GL_ASSERT;
+			
 		}
 
 		_gl glBindTexture(GL_TEXTURE_2D, 0);
@@ -230,7 +230,7 @@ uint32_t PackSpriteSheet::UploadData(GLViewWidget *gl, void ** sprites, uint32_t
 		throw;
 	}
 
-	GL_ASSERT;
+	
 
 	return r;
 }

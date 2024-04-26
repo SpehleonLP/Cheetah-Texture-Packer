@@ -19,13 +19,13 @@ void TransparencyShader::construct(GLViewWidget* gl)
 
 void TransparencyShader::destruct(GLViewWidget* gl)
 {
-	_gl glAssert();
+	
 	glDefaultVAOs::Release(gl);
 }
 
 void TransparencyShader::bind(GLViewWidget* gl, Material *)
 {
-	GL_ASSERT;
+	
 
     if(bindShader(gl))
 	{
@@ -41,7 +41,7 @@ void TransparencyShader::bind(GLViewWidget* gl, Material *)
 	_gl glActiveTexture(GL_TEXTURE10);
 	_gl glBindTexture(GL_TEXTURE_BUFFER, 0);
 
-    GL_ASSERT;
+    
 }
 
 static const char * kFrag()

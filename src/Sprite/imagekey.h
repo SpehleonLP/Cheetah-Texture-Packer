@@ -14,8 +14,8 @@ struct ImageKey
 	int			   index{};
 	counted_string path;
 
-	std::string getFilename() const;
-	std::string getDirectory() const;
+	std::string_view getFilename() const;
+	std::string_view getDirectory() const;
 	std::string getMimeType() const;
 
 	bool empty() const { return path.empty(); }

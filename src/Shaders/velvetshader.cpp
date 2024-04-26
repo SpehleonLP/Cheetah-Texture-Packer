@@ -53,7 +53,7 @@ void VelvetShader::construct(GLViewWidget* gl)
 
 void VelvetShader::destruct(GLViewWidget* gl)
 {
-	_gl glAssert();
+
 	_gl glDeleteTextures(1, &texture);
 	glDefaultVAOs::Release(gl);
 
@@ -62,7 +62,7 @@ void VelvetShader::destruct(GLViewWidget* gl)
 
 void VelvetShader::bind(GLViewWidget* gl, glm::vec4 color)
 {
-	_gl glAssert();
+
 
     if(bindShader(gl))
 	{
@@ -80,7 +80,7 @@ void VelvetShader::bind(GLViewWidget* gl, glm::vec4 color)
 
 	_gl glUniform4fv(u_color, 1, &color[0]);
 	_gl glUniform2i(u_texSize, TEX_SIZE_X, TEX_SIZE_Y);
-    _gl glAssert();
+
 }
 
 static const char * kVert()

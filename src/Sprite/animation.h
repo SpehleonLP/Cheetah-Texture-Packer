@@ -1,6 +1,6 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include "Support/counted_string.h"
 #include <atomic>
 
@@ -15,7 +15,7 @@ struct Animation
 	Animation(Animation const& it) { *this = it; }
 
 	counted_string              name;
-	CountedSizedArray<uint16_t> frames;
+	shared_array<uint16_t> frames;
 	float                       fps{20};
 	uint16_t              loop_start{0};
 	uint16_t              loop_end{0};

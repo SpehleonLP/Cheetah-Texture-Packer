@@ -23,7 +23,7 @@ void UnlitShader::construct(GLViewWidget* gl)
 
 void UnlitShader::destruct(GLViewWidget* gl)
 {
-	_gl glAssert();
+	
 	glDefaultVAOs::Release(gl);
 }
 
@@ -55,7 +55,7 @@ void UnlitShader::bind(GLViewWidget* gl, Material * )
 
 
 
-    _gl glAssert();
+    
 }
 
 void UnlitShader::bindTexture(GLViewWidget* gl, uint32_t texture)

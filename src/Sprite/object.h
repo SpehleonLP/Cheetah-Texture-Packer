@@ -1,6 +1,6 @@
 #ifndef SPRITEOBJECT_H
 #define SPRITEOBJECT_H
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include "Support/counted_string.h"
 #include "material.h"
 #include "animation.h"

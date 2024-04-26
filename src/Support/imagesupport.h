@@ -1,7 +1,7 @@
 #ifndef IMAGESUPPORT_H
 #define IMAGESUPPORT_H
 #include "Support/counted_string.h"
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include <glm/gtc/type_precision.hpp>
 #include <glm/vec4.hpp>
 #include <glm/vec2.hpp>
@@ -72,11 +72,11 @@ namespace IO
 	glm::i16vec4 GetSprite(uint8_t * data, glm::i16vec2 size, int channels, glm::i16vec2 tl, uint32_t color);
 	glm::i16vec4 GetCrop  (const uint8_t * data, glm::i16vec2 size, int channels, glm::i16vec4 aabb, uint32_t greenMask, uint32_t greenScreen);
 
-	CountedSizedArray<glm::i16vec4> GetSprites(uint8_t * data, uint32_t, glm::i16vec2 size, int channels);
-	CountedSizedArray<glm::i16vec4> GetCrop(uint8_t * data, uint32_t data_bytes, glm::i16vec2 size, int channels, ConstSizedArray<glm::i16vec4> sprites);
-	CountedSizedArray<glm::u16vec4> NormalizeCrop(ConstSizedArray<glm::i16vec4> sprites, glm::i16vec2 size);
+	shared_array<glm::i16vec4> GetSprites(uint8_t * data, uint32_t, glm::i16vec2 size, int channels);
+	shared_array<glm::i16vec4> GetCrop(uint8_t * data, uint32_t data_bytes, glm::i16vec2 size, int channels, immutable_array<glm::i16vec4> sprites);
+	shared_array<glm::u16vec4> NormalizeCrop(immutable_array<glm::i16vec4> sprites, glm::i16vec2 size);
 
-	bool CheckDynamics(std::string & error, float & size_ratio, ConstSizedArray<glm::i16vec4> A, ConstSizedArray<glm::i16vec4> B);
+	bool CheckDynamics(std::string & error, float & size_ratio, immutable_array<glm::i16vec4> A, immutable_array<glm::i16vec4> B);
 };
 
 

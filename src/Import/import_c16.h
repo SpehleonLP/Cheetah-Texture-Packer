@@ -2,7 +2,7 @@
 #define IMPORT_C16_H
 #include <memory>
 #include <cstdint>
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include <glm/gtc/type_precision.hpp>
 
 class SpriteFile
@@ -44,9 +44,9 @@ public:
 	void AllocHeap();
 	void CreatePointers();
 
-	CountedSizedArray<glm::u16vec2> sizes;
-	CountedSizedArray<void*>        pointers;
-	CountedSizedArray<uint8_t>      heap;
+	shared_array<glm::u16vec2> sizes;
+	shared_array<void*>        pointers;
+	shared_array<uint8_t>      heap;
 
 	uint16_t                        count{};
 	uint32_t                        internalFormat{};

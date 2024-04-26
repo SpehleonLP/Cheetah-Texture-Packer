@@ -34,7 +34,7 @@ size_t  SpriteFile::GetTotalPixels() const
 
 void SpriteFile::AllocHeap()
 {
-	heap = CountedSizedArray<uint8_t>(GetTotalPixels() * Qt_to_Gl::GetPixelByteWidth(format, type));
+	heap = shared_array<uint8_t>(GetTotalPixels() * Qt_to_Gl::GetPixelByteWidth(format, type));
 	CreatePointers();
 }
 
@@ -42,7 +42,7 @@ void SpriteFile::CreatePointers()
 {
 	int bbp = Qt_to_Gl::GetPixelByteWidth(format, type);
 
-	pointers = CountedSizedArray<void*>(sizes.size());
+	pointers = shared_array<void*>(sizes.size());
 	uint8_t * ptr = &heap[0];
 
 	for(uint16_t i = 0; i < pointers.size(); ++i)
@@ -101,7 +101,7 @@ struct C16Header
 	uint16_t width;
 	uint16_t height;
 
-	CountedSizedArray<uint32_t> row_offsets;
+	shared_array<uint32_t> row_offsets;
 };
 
 SpriteFile SpriteFile::ReadSpr(const char * path)
@@ -247,7 +247,7 @@ SpriteFile SpriteFile::ReadC16(const char * path)
 
 		if(header[i].height > 1)
 		{
-			header[i].row_offsets = CountedSizedArray<uint32_t>(header[i].height);
+			header[i].row_offsets = shared_array<uint32_t>(header[i].height);
 			header[i].row_offsets[0] = header[i].offset;
 			fp.read((char*)&header[i].row_offsets[1], 4 * (header[i].height-1));
 		}

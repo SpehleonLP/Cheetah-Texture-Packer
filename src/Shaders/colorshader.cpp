@@ -23,7 +23,7 @@ void ColorShader::construct(GLViewWidget* gl)
 
 void ColorShader::destruct(GLViewWidget* gl)
 {
-	_gl glAssert();
+	
 	glDefaultVAOs::Release(gl);
 }
 
@@ -53,7 +53,7 @@ void ColorShader::bind(GLViewWidget* gl, Material * )
 
 
 
-    _gl glAssert();
+    
 }
 
 void ColorShader::bindTexture(GLViewWidget* gl, uint32_t texture)

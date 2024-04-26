@@ -2,7 +2,8 @@
 #define IMAGE_H
 #include "imagekey.h"
 #include "Support/counted_string.h"
-#include "Support/countedsizedarray.hpp"
+#include "Support/counted_ptr.hpp"
+#include "Support/shared_array.hpp"
 #include <glm/gtc/type_precision.hpp>
 #include <glm/vec4.hpp>
 #include <glm/vec2.hpp>
@@ -35,15 +36,15 @@ public:
 	std::unique_ptr<uint8_t[]> LoadFileAsArray(uint32_t & size) const;
 	counted_ptr<ImageTextureCoordinates> m_texCoords;
 
-	bool isLoaded() const { return m_isLoaded; }
-	bool hasAlpha() const { return m_hasAlpha; }
+	__always_inline bool isLoaded() const { return m_isLoaded; }
+	__always_inline bool hasAlpha() const { return m_hasAlpha; }
 
-	uint32_t GetTexture() const { return m_texture; };
-	glm::u16vec2 GetSize() const { return m_size; }
+	__always_inline uint32_t GetTexture() const { return m_texture; };
+	__always_inline glm::u16vec2 GetSize() const { return m_size; }
 
-	std::string getFilename()	const { return m_key.getFilename(); }
-	std::string getDirectory()	const { return m_key.getDirectory(); }
-	std::string getMimeType()	const { return m_key.getMimeType(); }
+	__always_inline auto getFilename()	const { return m_key.getFilename(); }
+	__always_inline auto getDirectory()	const { return m_key.getDirectory(); }
+	__always_inline auto getMimeType()	const { return m_key.getMimeType(); }
 
 	ImageKey const& key() const { return m_key; }
 

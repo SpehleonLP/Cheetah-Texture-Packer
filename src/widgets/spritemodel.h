@@ -1,7 +1,7 @@
 #ifndef SPRITEMODEL_H
 #define SPRITEMODEL_H
 #include "enums.hpp"
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include <glm/vec2.hpp>
 #include <QAbstractItemModel>
 #include <memory>
@@ -78,8 +78,8 @@ public:
 	template<int num>
 	static bool ArrayFromString(std::array<float, num> & dst, QString const&);
 
-	static QString StringFromVector(CountedSizedArray<uint16_t> const& array);
-	static bool VectorFromString(CountedSizedArray<uint16_t> & dst, QString const&);
+	static QString StringFromVector(shared_array<uint16_t> const& array);
+	static bool VectorFromString(shared_array<uint16_t> & dst, QString const&);
 
 	static bool onSelected(QModelIndex const& index);
 	glm::vec2 GetItemSize(QModelIndex const& index) const;

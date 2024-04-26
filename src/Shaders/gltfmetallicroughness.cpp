@@ -33,7 +33,7 @@ void gltfMetallicRoughness::construct(GLViewWidget* gl)
 
 void gltfMetallicRoughness::destruct(GLViewWidget* gl)
 {
-	_gl glAssert();
+	
 	DefaultTextures::Get().Release(gl);
 }
 
@@ -103,7 +103,7 @@ typedef fx::gltf::Material::AlphaMode AlphaMode;
 
 	_gl glUniform3fv(u_emissionFactor, 1, &material->emissiveFactor[0]);
 
-    _gl glAssert();
+    
 }
 
 static const char * kFrag()

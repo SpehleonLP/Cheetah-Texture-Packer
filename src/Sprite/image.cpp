@@ -146,7 +146,7 @@ bool Image::LoadFromFile()
 	IO::Image image;
 	m_ownsTexture = true;
 
-	CountedSizedArray<glm::i16vec4> spritesFromSheet;
+	shared_array<glm::i16vec4> spritesFromSheet;
 
 	{
 		auto sprite = SpriteFile::OpenSprite(m_key.path.c_str());
@@ -264,9 +264,9 @@ void Image::Clear()
 }
 
 template<typename T, glm::qualifier Q>
-void UploadTextureData(GLViewWidget * gl, CountedSizedArray<glm::vec<4, T, Q>> array, glm::vec<4, T, Q> base, T max_y)
+void UploadTextureData(GLViewWidget * gl, shared_array<glm::vec<4, T, Q>> array, glm::vec<4, T, Q> base, T max_y)
 {
-	GL_ASSERT;
+	
 	std::vector<glm::vec<2, T, Q> > vec;
 	vec.reserve((1 + array.size()) * 4);
 
@@ -284,13 +284,13 @@ void UploadTextureData(GLViewWidget * gl, CountedSizedArray<glm::vec<4, T, Q>> a
 	}
 
 	_gl glBufferData(GL_ARRAY_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW);
-	GL_ASSERT;
+	
 }
 
 template<typename T, glm::qualifier Q>
-void UploadTextureData(GLViewWidget * gl, CountedSizedArray<glm::vec<4, T, Q>> array, glm::vec<4, T, Q> base)
+void UploadTextureData(GLViewWidget * gl, shared_array<glm::vec<4, T, Q>> array, glm::vec<4, T, Q> base)
 {
-	GL_ASSERT;
+	
 	std::vector<glm::vec<2, T, Q> > vec;
 	vec.reserve((1 + array.size()) * 4);
 
@@ -308,7 +308,7 @@ void UploadTextureData(GLViewWidget * gl, CountedSizedArray<glm::vec<4, T, Q>> a
 	}
 
 	_gl glBufferData(GL_ARRAY_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW);
-	GL_ASSERT;
+	
 }
 
 
@@ -320,7 +320,7 @@ void Image::UploadVertexArrays()
 
 	auto gl = m_manager->gl;
 
-	GL_ASSERT;
+	
 
 //-------------------------------
 // SET UP VAOs
@@ -331,39 +331,39 @@ void Image::UploadVertexArrays()
 		_gl glGenBuffers(VBOc, &m_vbo[0]);
 
 		_gl glBindVertexArray(m_vao[0]);
-		glDefaultVAOs::BindSquareIndexVBO(gl);GL_ASSERT;
+		glDefaultVAOs::BindSquareIndexVBO(gl);
 
 		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[SpriteCoords]);
-		_gl glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);GL_ASSERT;
+		_gl glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
 		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[Centers]);
-		_gl glVertexAttribPointer(1, 2, GL_SHORT, GL_FALSE, 0, nullptr);GL_ASSERT;
-
-		_gl glEnableVertexAttribArray(0);
-		_gl glEnableVertexAttribArray(1);GL_ASSERT;
-
-		_gl glBindVertexArray(m_vao[1]);
-		glDefaultVAOs::BindSquareIndexVBO(gl);GL_ASSERT;
-
-		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[CropBoxes]);
-		_gl glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);GL_ASSERT;
-
-		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[Centers]);
-		_gl glVertexAttribPointer(1, 2, GL_SHORT, GL_FALSE, 0, nullptr);GL_ASSERT;
-
-		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[TexCoord]);
-		_gl glVertexAttribPointer(2, 2, GL_UNSIGNED_SHORT, GL_TRUE, 0, nullptr);GL_ASSERT;
+		_gl glVertexAttribPointer(1, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
 		_gl glEnableVertexAttribArray(0);
 		_gl glEnableVertexAttribArray(1);
-		_gl glEnableVertexAttribArray(3);GL_ASSERT;
+
+		_gl glBindVertexArray(m_vao[1]);
+		glDefaultVAOs::BindSquareIndexVBO(gl);
+
+		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[CropBoxes]);
+		_gl glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
+
+		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[Centers]);
+		_gl glVertexAttribPointer(1, 2, GL_SHORT, GL_FALSE, 0, nullptr);
+
+		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[TexCoord]);
+		_gl glVertexAttribPointer(2, 2, GL_UNSIGNED_SHORT, GL_TRUE, 0, nullptr);
+
+		_gl glEnableVertexAttribArray(0);
+		_gl glEnableVertexAttribArray(1);
+		_gl glEnableVertexAttribArray(3);
 
 //upload perminant things
 		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[SpriteCoords]);
-		UploadTextureData(gl, m_sprites, glm::i16vec4(0, 0, m_size.x, m_size.y), m_size.y);GL_ASSERT;
+		UploadTextureData(gl, m_sprites, glm::i16vec4(0, 0, m_size.x, m_size.y), m_size.y);
 
 		std::vector<glm::i16vec2> vec;
-		vec.reserve((m_sprites.size()+1));GL_ASSERT;
+		vec.reserve((m_sprites.size()+1));
 
 		vec.push_back({m_size.x/2, m_size.y/2});
 		vec.push_back({m_size.x/2, m_size.y/2});
@@ -379,16 +379,16 @@ void Image::UploadVertexArrays()
 		}
 
 		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[Centers]);
-		_gl glBufferData(GL_ARRAY_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW);GL_ASSERT;
+		_gl glBufferData(GL_ARRAY_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW);
 	}
 
 	_gl glBindVertexArray(m_vao[0]);
 
 	_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[CropBoxes]);
-	UploadTextureData(gl, m_cropped, glm::i16vec4(0, 0, m_size.x, m_size.y), m_size.y);GL_ASSERT;
+	UploadTextureData(gl, m_cropped, glm::i16vec4(0, 0, m_size.x, m_size.y), m_size.y);
 
 	_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[TexCoord]);
-	UploadTextureData(gl, m_normalized, glm::u16vec4(0, 0, USHRT_MAX, USHRT_MAX));GL_ASSERT;
+	UploadTextureData(gl, m_normalized, glm::u16vec4(0, 0, USHRT_MAX, USHRT_MAX));
 }
 
 void Image::Render(GLViewWidget * gl, int frame, int outline)
@@ -396,7 +396,7 @@ void Image::Render(GLViewWidget * gl, int frame, int outline)
 	if(m_sprites.empty())
 		return;
 
-	GL_ASSERT;
+	
 	assert(gl == m_manager->gl);
 
 	if(frame >= 0) frame %= m_sprites.size();
@@ -421,7 +421,7 @@ void Image::Render(GLViewWidget * gl, int frame, int outline)
 			TransparencyShader::Shader.bindCenter(gl, center);
 			TransparencyShader::Shader.bindMatrix(gl, matrix);
 
-			_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);GL_ASSERT;
+			_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 		}
 
 //draw sprites boxes
@@ -430,9 +430,9 @@ void Image::Render(GLViewWidget * gl, int frame, int outline)
 		BlitShader::Shader.bindMatrix(gl, matrix);
 
 		BlitShader::Shader.bindLayer(gl, 3);
-		BlitShader::Shader.bindColor(gl, glm::vec4(0, 0, 0, 0));GL_ASSERT;
+		BlitShader::Shader.bindColor(gl, glm::vec4(0, 0, 0, 0));
 
-		_gl glDrawElements(GL_TRIANGLES, elements, GL_UNSIGNED_SHORT, offset);GL_ASSERT;
+		_gl glDrawElements(GL_TRIANGLES, elements, GL_UNSIGNED_SHORT, offset);
 
 //draw sprite outlines
 		_gl glBindVertexArray(m_vao[1]);
@@ -441,13 +441,13 @@ void Image::Render(GLViewWidget * gl, int frame, int outline)
 		{
 			BlitShader::Shader.bindLayer(gl, 2);
 			BlitShader::Shader.bindColor(gl, glm::vec4(1, 1, 1, 1));
-			_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);GL_ASSERT;
+			_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 		}
 
 //draw sprites
 		_gl glDisable(GL_DEPTH_TEST);
 		BlitShader::Shader.bindLayer(gl, 4);
-		BlitShader::Shader.bindTexture(gl, m_texture);GL_ASSERT;
+		BlitShader::Shader.bindTexture(gl, m_texture);
 		BlitShader::Shader.clearColor(gl);
 		_gl glDrawElements(GL_TRIANGLES, elements, GL_UNSIGNED_SHORT, offset);
 	}
@@ -457,12 +457,12 @@ void Image::Render(GLViewWidget * gl, int frame, int outline)
 		BlitShader::Shader.bind(gl);
 		BlitShader::Shader.bindLayer(gl, 1);
 		BlitShader::Shader.bindCenter(gl, frame >= 0);
-		BlitShader::Shader.bindColor(gl, glm::vec4(1, 1, 0, 0));GL_ASSERT;
+		BlitShader::Shader.bindColor(gl, glm::vec4(1, 1, 0, 0));
 
 		_gl glBindVertexArray(m_vao[outline % 2]);
 		_gl glDrawArrays(GL_TRIANGLES, first, elements);
 	}
 
-	GL_ASSERT;
+	
 }
 */

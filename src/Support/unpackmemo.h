@@ -22,9 +22,9 @@ typedef counted_ptr<ImageTextureCoordinates> TexCoords;
 	UnpackMemo(const std::string & documentFilePath);
 	~UnpackMemo();
 
-	ConstSizedArray<glm::i16vec4> GetAccessor_i16vec4(Sprites::Document const& doc, int i);
-	ConstSizedArray<glm::i16vec2> GetAccessor_i16vec2(Sprites::Document const& doc, int i);
-	ConstSizedArray<glm::u16vec4> GetAccessor_u16vec4(Sprites::Document const& doc, int i);
+	immutable_array<glm::i16vec4> GetAccessor_i16vec4(Sprites::Document const& doc, int i);
+	immutable_array<glm::i16vec2> GetAccessor_i16vec2(Sprites::Document const& doc, int i);
+	immutable_array<glm::u16vec4> GetAccessor_u16vec4(Sprites::Document const& doc, int i);
 	counted_ptr<ImageTextureCoordinates> GetTexCoords(Sprites::Document const& doc, int i);
 
 	counted_ptr<Image> UnpackImage(ImageManager * gl, UnpackMemo & memo, Sprites::Document const& doc, fx::gltf::Material::Texture const& texture);
@@ -34,13 +34,13 @@ typedef counted_ptr<ImageTextureCoordinates> TexCoords;
 private:
 
 	template<typename T>
-	ConstSizedArray<T> GetAccessor(Sprites::Document const& doc, int i, std::vector<ConstSizedArray<T>> UnpackMemo::*array);
+	immutable_array<T> GetAccessor(Sprites::Document const& doc, int i, std::vector<immutable_array<T>> UnpackMemo::*array);
 
 
 //previously loaded accessors
-	std::vector<ConstSizedArray<glm::i16vec4>> m_i16vec4Accessors;
-	std::vector<ConstSizedArray<glm::i16vec2>> m_i16vec2Accessors;
-	std::vector<ConstSizedArray<glm::u16vec4>> m_u16vec4Accessors;
+	std::vector<immutable_array<glm::i16vec4>> m_i16vec4Accessors;
+	std::vector<immutable_array<glm::i16vec2>> m_i16vec2Accessors;
+	std::vector<immutable_array<glm::u16vec4>> m_u16vec4Accessors;
 	std::vector<TexCoords>					   m_texCoords;
 };
 

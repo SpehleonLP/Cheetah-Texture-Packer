@@ -1,6 +1,7 @@
 #ifndef IMAGETEXTURECOORDINATES_H
 #define IMAGETEXTURECOORDINATES_H
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
+#include "Support/counted_ptr.hpp"
 #include <glm/gtc/type_precision.hpp>
 
 namespace IO { struct Image; }
@@ -12,8 +13,8 @@ struct PackMemo;
 class ImageTextureCoordinates
 {
 public:
-typedef ConstSizedArray<glm::i16vec4> i16vec4array;
-typedef ConstSizedArray<glm::u16vec4> u16vec4array;
+typedef immutable_array<glm::i16vec4> i16vec4array;
+typedef immutable_array<glm::u16vec4> u16vec4array;
 	enum Compatibility
 	{
 		None,

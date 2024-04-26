@@ -4,7 +4,7 @@
 #include <fx/extensions/khr_materials.h>
 #include "commandinterface.hpp"
 #include "packersettings.h"
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include "Support/counted_string.h"
 #include "Support/counted_ptr.hpp"
 #include "image.h"

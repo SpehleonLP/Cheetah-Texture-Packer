@@ -2,7 +2,7 @@
 #define SPRITESHEET_H
 #include <cstdint>
 #include <glm/gtc/type_precision.hpp>
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 
 class GLViewWidget;
 struct RenderData;
@@ -28,7 +28,7 @@ public:
 
 	void Clear(GLViewWidget*);
 
-	void Prepare(GLViewWidget*, const ConstSizedArray<glm::i16vec4> & sprites, glm::i16vec2 sheet_size);
+	void Prepare(GLViewWidget*, const immutable_array<glm::i16vec4> & sprites, glm::i16vec2 sheet_size);
 	void RenderSheet(GLViewWidget * gl, RenderData db);
 
 	void BindCenters      (GLViewWidget*, uint32_t active_texture);

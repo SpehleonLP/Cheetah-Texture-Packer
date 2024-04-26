@@ -83,7 +83,7 @@ public:
 	};
 
 
-typedef std::array<ConstSizedArray<glm::u16vec4>, (int)TexCoords::Total>	TexCoord_t;
+typedef std::array<immutable_array<glm::u16vec4>, (int)TexCoords::Total>	TexCoord_t;
 typedef std::array<int, (int)Tex::Total>									TexIndex_t;
 typedef std::array<counted_ptr<Image>, (int)Tex::Total>						ImageSlot_t;
 
@@ -176,12 +176,12 @@ private:
 	uint32_t     m_dirtyTextureFlags{0};
 
 //made in prepare -> create default arrays
-	ConstSizedArray<glm::vec2>    m_normalizedPositions{};
-	ConstSizedArray<Pair>         m_spriteIndices{};
-	ConstSizedArray<Pair>         m_spriteVertices{};
+	immutable_array<glm::vec2>    m_normalizedPositions{};
+	immutable_array<Pair>         m_spriteIndices{};
+	immutable_array<Pair>         m_spriteVertices{};
 
 private:
-	ConstSizedArray<glm::vec2>  CreateNormalizedPositions() const;
+	immutable_array<glm::vec2>  CreateNormalizedPositions() const;
 
 	void LoadExtensionsAndExtras();
 };

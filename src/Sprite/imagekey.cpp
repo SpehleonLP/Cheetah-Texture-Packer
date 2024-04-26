@@ -2,7 +2,7 @@
 #include "Support/imagesupport.h"
 
 
-std::string ImageKey::getFilename() const
+std::string_view ImageKey::getFilename() const
 {
 	const std::size_t slash_pos = path.find_last_of("/\\");
 	const std::size_t period_pos = path.find_last_of(".");
@@ -14,7 +14,7 @@ std::string ImageKey::getFilename() const
 	return {};
 }
 
-std::string ImageKey::getDirectory() const
+std::string_view ImageKey::getDirectory() const
 {
 	const std::size_t pos = path.find_last_of("/\\");
 	if (pos != std::string::npos)

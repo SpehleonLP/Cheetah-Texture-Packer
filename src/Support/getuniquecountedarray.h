@@ -1,6 +1,7 @@
 #ifndef GETUNIQUECOUNTEDARRAY_H
 #define GETUNIQUECOUNTEDARRAY_H
-#include "countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
+#include <vector>
 #include <cstring>
 #include <mutex>
 
@@ -10,9 +11,9 @@ struct CountedDBBase
 };
 
 template<typename T>
-inline ConstSizedArray<T> MakeUnique(ConstSizedArray<T> const& array)
+inline immutable_array<T> MakeUnique(immutable_array<T> const& array)
 {
-	static std::vector<ConstSizedArray<T>> g_database;
+	static std::vector<immutable_array<T>> g_database;
 
 	if(array.empty())
 		return array;

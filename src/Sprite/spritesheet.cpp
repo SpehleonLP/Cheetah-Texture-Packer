@@ -54,9 +54,9 @@ inline void PushSprite(std::vector<vertex> & vec, glm::i16vec4 item, uint32_t id
 }
 
 
-void SpriteSheet::Prepare(GLViewWidget* gl, ConstSizedArray<glm::i16vec4> const& sprites, glm::i16vec2 sheet_size)
+void SpriteSheet::Prepare(GLViewWidget* gl, immutable_array<glm::i16vec4> const& sprites, glm::i16vec2 sheet_size)
 {
-	GL_ASSERT;
+	
 
 	if(m_sprites == sprites.data()
 	&& m_size    == sheet_size)
@@ -74,31 +74,31 @@ void SpriteSheet::Prepare(GLViewWidget* gl, ConstSizedArray<glm::i16vec4> const&
 		TransparencyShader::Shader.AddRef();
 		ColorShader::Shader.AddRef();
 
-		_gl glGenVertexArrays(VAOc, m_vao);	DEBUG_GL;
-		_gl glGenBuffers(VBOc, m_vbo);	DEBUG_GL;
-		_gl glGenTextures(TEXc,   m_texture);	DEBUG_GL;
+		_gl glGenVertexArrays(VAOc, m_vao);	;
+		_gl glGenBuffers(VBOc, m_vbo);	;
+		_gl glGenTextures(TEXc,   m_texture);	;
 
 		for(int i = 0; i < VAOc; ++i)
 		{
-			_gl glBindVertexArray(m_vao[i]);	DEBUG_GL;
-			_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[a_vertex]);	DEBUG_GL;
+			_gl glBindVertexArray(m_vao[i]);	;
+			_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[a_vertex]);	;
 
 			if(i == v_Squares)
 				glDefaultVAOs::BindSquareIndexVBO(gl);
 
-			_gl glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, sizeof(vertex), (void*) offsetof(vertex, position));	DEBUG_GL;
-			_gl glVertexAttribIPointer(1, 1, GL_INT, sizeof(vertex), (void*) offsetof(vertex, sprite_id));	DEBUG_GL;
-			_gl glVertexAttribPointer(2, 2, GL_BYTE, GL_FALSE, sizeof(vertex), (void*) offsetof(vertex, texCoord0));	DEBUG_GL;
+			_gl glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, sizeof(vertex), (void*) offsetof(vertex, position));	;
+			_gl glVertexAttribIPointer(1, 1, GL_INT, sizeof(vertex), (void*) offsetof(vertex, sprite_id));	;
+			_gl glVertexAttribPointer(2, 2, GL_BYTE, GL_FALSE, sizeof(vertex), (void*) offsetof(vertex, texCoord0));	;
 
-			_gl glEnableVertexAttribArray(0);	DEBUG_GL;
-			_gl glEnableVertexAttribArray(1);	DEBUG_GL;
-			_gl glEnableVertexAttribArray(2);	DEBUG_GL;
+			_gl glEnableVertexAttribArray(0);	;
+			_gl glEnableVertexAttribArray(1);	;
+			_gl glEnableVertexAttribArray(2);	;
 		}
 
-		GL_ASSERT;
+		
 	}
 
-	_gl glBindVertexArray(m_vao[0]); DEBUG_GL
+	_gl glBindVertexArray(m_vao[0]); 
 
 //sprite VBO ultimately needs to be all centered etc.
 	{
@@ -111,8 +111,8 @@ void SpriteSheet::Prepare(GLViewWidget* gl, ConstSizedArray<glm::i16vec4> const&
 		for(uint32_t i = 0; i < sprites.size(); ++i)
 			PushSprite(vec, sprites[i], i+1);
 
-		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[a_vertex]); DEBUG_GL
-		_gl glBufferData(GL_ARRAY_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW); DEBUG_GL
+		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[a_vertex]); 
+		_gl glBufferData(GL_ARRAY_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW); 
 	}
 
 //make textures
@@ -132,8 +132,8 @@ void SpriteSheet::Prepare(GLViewWidget* gl, ConstSizedArray<glm::i16vec4> const&
 		}
 
 
-		_gl glBindBuffer(GL_TEXTURE_BUFFER, m_vbo[a_bounds]); DEBUG_GL
-		_gl glBufferData(GL_TEXTURE_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW); DEBUG_GL
+		_gl glBindBuffer(GL_TEXTURE_BUFFER, m_vbo[a_bounds]); 
+		_gl glBufferData(GL_TEXTURE_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW); 
 	}
 
 	{
@@ -150,19 +150,19 @@ void SpriteSheet::Prepare(GLViewWidget* gl, ConstSizedArray<glm::i16vec4> const&
 		//	vec.push_back({1, 1});
 		}
 
-		_gl glBindBuffer(GL_TEXTURE_BUFFER, m_vbo[a_centers]); DEBUG_GL
-		_gl glBufferData(GL_TEXTURE_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW); DEBUG_GL
+		_gl glBindBuffer(GL_TEXTURE_BUFFER, m_vbo[a_centers]); 
+		_gl glBufferData(GL_TEXTURE_BUFFER, vec.size() * sizeof(vec[0]), &vec[0], GL_STATIC_DRAW); 
 	}
 
-	_gl glBindTexture(GL_TEXTURE_BUFFER, m_texture[t_centers]);	DEBUG_GL;
-	_gl glTexBuffer(GL_TEXTURE_BUFFER, GL_RG16I, m_vbo[a_centers]);	DEBUG_GL;
+	_gl glBindTexture(GL_TEXTURE_BUFFER, m_texture[t_centers]);	;
+	_gl glTexBuffer(GL_TEXTURE_BUFFER, GL_RG16I, m_vbo[a_centers]);	;
 
-	_gl glBindTexture(GL_TEXTURE_BUFFER, m_texture[t_bounds]); DEBUG_GL
-	_gl glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA16I, m_vbo[a_bounds]); DEBUG_GL
+	_gl glBindTexture(GL_TEXTURE_BUFFER, m_texture[t_bounds]); 
+	_gl glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA16I, m_vbo[a_bounds]); 
 
-	_gl glBindTexture(GL_TEXTURE_BUFFER, 0); DEBUG_GL
+	_gl glBindTexture(GL_TEXTURE_BUFFER, 0); 
 
-	GL_ASSERT;
+	
 }
 
 void SpriteSheet::BindCenters      (GLViewWidget* gl, uint32_t active_texture)
@@ -179,7 +179,7 @@ void SpriteSheet::BindBoundingBoxes(GLViewWidget* gl, uint32_t active_texture)
 
 void SpriteSheet::RenderSheet(GLViewWidget * gl, RenderData db)
 {
-	GL_ASSERT;
+	
 
 	if(m_sprites == nullptr)
 		return;
@@ -197,7 +197,7 @@ void SpriteSheet::RenderSheet(GLViewWidget * gl, RenderData db)
 		if(!db.center) BindCenters(gl, GL_TEXTURE10);
 		TransparencyShader::Shader.bindMatrix(gl, db.matrix);
 
-		_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);GL_ASSERT;
+		_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 	}
 
 //draw sprites boxes
@@ -206,18 +206,18 @@ void SpriteSheet::RenderSheet(GLViewWidget * gl, RenderData db)
 	ColorShader::Shader.bindMatrix(gl, db.matrix);
 
 	ColorShader::Shader.bindLayer(gl, 3);
-	ColorShader::Shader.bindColor(gl, glm::vec4(0, 0, 0, 0)); DEBUG_GL
+	ColorShader::Shader.bindColor(gl, glm::vec4(0, 0, 0, 0)); 
 
-	_gl glDrawElements(GL_TRIANGLES, elements, GL_UNSIGNED_SHORT, offset); DEBUG_GL
+	_gl glDrawElements(GL_TRIANGLES, elements, GL_UNSIGNED_SHORT, offset); 
 
 //draw sprite outlines
 	if(db.frame < 0)
 	{
 		ColorShader::Shader.bindLayer(gl, 2);
 		ColorShader::Shader.bindColor(gl, glm::vec4(0, 0, 0, 1));
-		_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);GL_ASSERT;
+		_gl glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 	}
 
-	GL_ASSERT;
+	
 }
 

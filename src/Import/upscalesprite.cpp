@@ -30,8 +30,8 @@ SpriteFile double_image(SpriteFile const& image, QWidget * parent)
 //alloc 2x the size of the original
 	SpriteFile r(image);
 
-	r.sizes    = CountedSizedArray<glm::u16vec2>(r.count);
-	r.pointers = CountedSizedArray<void*>(r.count);
+	r.sizes    = shared_array<glm::u16vec2>(r.count);
+	r.pointers = shared_array<void*>(r.count);
 
 	uint32_t size = 0;
 
@@ -41,7 +41,7 @@ SpriteFile double_image(SpriteFile const& image, QWidget * parent)
 		size += r.sizes[i].x * r.sizes[i].y;
 	}
 
-	r.heap = CountedSizedArray<uint8_t>(size*4);
+	r.heap = shared_array<uint8_t>(size*4);
 
 	size = 0;
 	for(uint32_t i = 0; i < r.count; ++i)

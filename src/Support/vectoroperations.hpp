@@ -2,7 +2,7 @@
 #define VECTOROPERATIONS_HPP
 #include <glm/glm.hpp>
 #include <vector>
-#include "countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include "src/widgets/glviewwidget.h"
 
 template<typename T, glm::qualifier Q>
@@ -41,7 +41,7 @@ typedef std::vector<glm::vec<2, T, Q>> super;
 	}
 
 	template<typename T2, glm::qualifier Q2>
-	inline VectorOperator & Expand(CountedSizedArray<glm::vec<4, T2, Q2> > & array)
+	inline VectorOperator & Expand(shared_array<glm::vec<4, T2, Q2> > & array)
 	{
 		return Expand(&array[0], array.size());
 	}

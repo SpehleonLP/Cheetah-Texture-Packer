@@ -7,8 +7,6 @@
 #include <QMessageBox>
 #include <QGuiApplication>
 
-#define GL_ASSERT _gl glAssert();
-
 glProgram::glProgram() :
     m_refCount(0L),
     m_program(0L)
@@ -40,7 +38,7 @@ void glProgram::Release(OpenGL* gl)
 
 void glProgram::onDestruct(OpenGL * gl)
 {
-	GL_ASSERT;
+	
 
     if(m_program)
     {
@@ -48,11 +46,11 @@ void glProgram::onDestruct(OpenGL * gl)
 
         for(size_t i = 0; i < shaders.size(); ++i)
         {
-            _gl glDeleteShader(shaders[i]); GL_ASSERT
+            _gl glDeleteShader(shaders[i]); 
             shaders[i] = 0L;
         }
 
-        _gl glDeleteProgram(m_program); GL_ASSERT
+        _gl glDeleteProgram(m_program); 
         m_program = 0L;
     }
 }
@@ -60,10 +58,10 @@ void glProgram::onDestruct(OpenGL * gl)
 void glProgram::printLog(OpenGL * gl)
 {
     GLint length;
-    _gl glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &length); GL_ASSERT
+    _gl glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &length); 
 
     std::vector<char> log(length, 0);
-    _gl glGetProgramInfoLog(m_program, length, &length, log.data()); GL_ASSERT
+    _gl glGetProgramInfoLog(m_program, length, &length, log.data()); 
     fprintf(stderr, "%s", log.data());
     fflush(stderr);
 }
@@ -98,7 +96,7 @@ void glProgram::compile(OpenGL * gl, const char * text, GLuint type)
         throw std::logic_error("failed to add shader");
     }
 
-    _gl glAttachShader(m_program, shaders[i]); GL_ASSERT
+    _gl glAttachShader(m_program, shaders[i]); 
 }
 
 
@@ -118,7 +116,7 @@ bool glProgram::tryLoad(OpenGL * gl, const char * filename, GLuint type)
         return false;
     }
 
-    _gl glAttachShader(m_program, shaders[i]); GL_ASSERT
+    _gl glAttachShader(m_program, shaders[i]); 
     return true;
 }
 
@@ -139,15 +137,15 @@ void glProgram::load(OpenGL * gl, const char * filename, GLuint type)
         throw std::logic_error("failed to add shader");
     }
 
-    _gl glAttachShader(m_program, shaders[i]); GL_ASSERT
+    _gl glAttachShader(m_program, shaders[i]); 
 }
 
 void glProgram::link(OpenGL * gl)
 {
-    _gl glLinkProgram(m_program); GL_ASSERT
+    _gl glLinkProgram(m_program); 
 
     GLint status;
-    _gl glGetProgramiv(m_program, GL_LINK_STATUS, &status); GL_ASSERT
+    _gl glGetProgramiv(m_program, GL_LINK_STATUS, &status); 
 
     if(status == GL_FALSE)
     {
@@ -158,10 +156,10 @@ void glProgram::link(OpenGL * gl)
 
 bool glProgram::validate(OpenGL * gl)
 {
-    _gl glValidateProgram(m_program); GL_ASSERT
+    _gl glValidateProgram(m_program); 
 
     GLint status;
-    _gl glGetProgramiv(m_program, GL_VALIDATE_STATUS, &status); GL_ASSERT
+    _gl glGetProgramiv(m_program, GL_VALIDATE_STATUS, &status); 
 
     if(status == GL_FALSE)
     {
@@ -173,7 +171,7 @@ bool glProgram::validate(OpenGL * gl)
 
 void glProgram::attribute(OpenGL * gl, GLuint index, const char * name)
 {
-    _gl glBindAttribLocation(m_program, index, name); GL_ASSERT
+    _gl glBindAttribLocation(m_program, index, name); 
 }
 
 bool glProgram::uniformBlock(OpenGL * gl, uint32_t binding, const char * name)
@@ -189,18 +187,18 @@ bool glProgram::uniformBlock(OpenGL * gl, uint32_t binding, const char * name)
 
 void glProgram::uniform(OpenGL * gl, GLint & index, const char * name)
 {
-    index = _gl glGetUniformLocation(m_program, name); GL_ASSERT
+    index = _gl glGetUniformLocation(m_program, name); 
 }
 
 bool glProgram::bindShader(OpenGL * gl)
 {
     if(!m_program)
     {
-        m_program = _gl glCreateProgram(); GL_ASSERT
+        m_program = _gl glCreateProgram(); 
         construct(gl);
     }
 
-    _gl glUseProgram(m_program); GL_ASSERT
+    _gl glUseProgram(m_program); 
     return true;
 }
 
@@ -210,7 +208,7 @@ GLuint glProgram::compileShader(OpenGL * gl, const char * text, GLuint shader_ty
     GLint length = 0;
     std::vector<char> error;
 
-    shader = _gl glCreateShader(shader_type); GL_ASSERT
+    shader = _gl glCreateShader(shader_type); 
 
     if(!shader)
     {
@@ -218,11 +216,11 @@ GLuint glProgram::compileShader(OpenGL * gl, const char * text, GLuint shader_ty
         return 0;
     }
 
-    _gl glShaderSource(shader, 1, &text, 0L); GL_ASSERT
-    _gl glCompileShader(shader); GL_ASSERT
+    _gl glShaderSource(shader, 1, &text, 0L); 
+    _gl glCompileShader(shader); 
 
     GLint success = 0;
-    _gl glGetShaderiv(shader, GL_COMPILE_STATUS, &success); GL_ASSERT
+    _gl glGetShaderiv(shader, GL_COMPILE_STATUS, &success); 
 
     if(success != GL_FALSE)
     {
@@ -230,13 +228,13 @@ GLuint glProgram::compileShader(OpenGL * gl, const char * text, GLuint shader_ty
     }
 
     length = 0;
-    _gl glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length); GL_ASSERT
+    _gl glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length); 
 
     error.resize(length, 0);
-    _gl glGetShaderInfoLog(shader, length, &length, error.data()); GL_ASSERT
+    _gl glGetShaderInfoLog(shader, length, &length, error.data()); 
 
     fprintf(stderr, "%s", error.data());
-    _gl glDeleteShader(shader); GL_ASSERT
+    _gl glDeleteShader(shader); 
     return 0;
 }
 
@@ -255,7 +253,7 @@ GLuint glProgram::loadShader(OpenGL * gl, const char * filename, GLuint shader_t
         return 0;
     }
 
-    shader = _gl glCreateShader(shader_type); GL_ASSERT
+    shader = _gl glCreateShader(shader_type); 
 
     if(!shader)
     {
@@ -273,11 +271,11 @@ GLuint glProgram::loadShader(OpenGL * gl, const char * filename, GLuint shader_t
     fclose(file);
 
     text_ptr = text.data();
-    _gl glShaderSource(shader, 1, &text_ptr, &length); GL_ASSERT
-    _gl glCompileShader(shader); GL_ASSERT
+    _gl glShaderSource(shader, 1, &text_ptr, &length); 
+    _gl glCompileShader(shader); 
 
     GLint success = 0;
-    _gl glGetShaderiv(shader, GL_COMPILE_STATUS, &success); GL_ASSERT
+    _gl glGetShaderiv(shader, GL_COMPILE_STATUS, &success); 
 
     if(success != GL_FALSE)
     {
@@ -285,10 +283,10 @@ GLuint glProgram::loadShader(OpenGL * gl, const char * filename, GLuint shader_t
     }
 
     length = 0;
-    _gl glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length); GL_ASSERT
+    _gl glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length); 
     text.resize(length, 0);
-    _gl glGetShaderInfoLog(shader, length, &length, text.data()); GL_ASSERT
-    _gl glDeleteShader(shader); GL_ASSERT
+    _gl glGetShaderInfoLog(shader, length, &length, text.data()); 
+    _gl glDeleteShader(shader); 
 
     QMessageBox::information(nullptr, QGuiApplication::applicationDisplayName(), &text[0]);
 

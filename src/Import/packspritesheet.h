@@ -2,22 +2,22 @@
 #define PACKSPRITESHEET_H
 #include <glm/vec2.hpp>
 #include <glm/gtc/type_precision.hpp>
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include <vector>
 
 class GLViewWidget;
 
 struct PackSpriteSheet
 {
-	PackSpriteSheet(CountedSizedArray<glm::u16vec2> sizes);
+	PackSpriteSheet(shared_array<glm::u16vec2> sizes);
 
 	glm::u16vec2 size{0, 0};
 	glm::u8vec4  border_color{0, 0, 0, 0};
 
-	CountedSizedArray<glm::u16vec2> positions;
-	CountedSizedArray<glm::u16vec2> sizes;
+	shared_array<glm::u16vec2> positions;
+	shared_array<glm::u16vec2> sizes;
 
-	CountedSizedArray<glm::i16vec4> BuildSprites();
+	shared_array<glm::i16vec4> BuildSprites();
 	uint32_t UploadData(GLViewWidget *gl, void ** sprites, uint32_t internal_format, uint32_t format, uint32_t type, float compression_ratio = 0.f);
 
 private:

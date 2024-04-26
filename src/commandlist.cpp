@@ -17,7 +17,7 @@ ObjectCommand::ObjectCommand(Document * doc, int obj, counted_string insert) :
 		new_offset = 0;
 		for(; new_offset < doc->objects.size(); ++new_offset)
 		{
-			if(new_name >= doc->objects[new_offset]->name)
+			if(doc->objects[new_offset]->name < new_name)
 				break;
 		}
 
@@ -106,7 +106,7 @@ void AnimationCommand::InsertAnimation()
 {
 	for(uint32_t i = 0; i < object->animations.size(); ++i)
 	{
-		if(object->animations[i]->name >= animation->name)
+		if(animation->name < object->animations[i]->name)
 		{
 			object->animations.insert(object->animations.begin()+i, animation);
 			return;

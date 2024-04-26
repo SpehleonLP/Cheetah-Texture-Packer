@@ -2,7 +2,7 @@
 #define COUNTEDGLTFIMAGE_H
 #include "Support/counted_ptr.hpp"
 #include "Support/counted_string.h"
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include <fx/gltf.h>
 #include <atomic>
 
@@ -29,7 +29,7 @@ struct CountedImage
 	std::string directory() const;
 	std::string filename()  const;
 
-	CountedSizedArray<uint8_t> imageBuffer;
+	shared_array<uint8_t> imageBuffer;
 
 	counted_string name;
 	counted_string uri;

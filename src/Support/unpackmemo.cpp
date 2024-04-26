@@ -38,11 +38,11 @@ counted_ptr<ImageTextureCoordinates> UnpackMemo::GetTexCoords(Sprites::Document 
 }
 
 template<int n, typename T, glm::qualifier Q>
-ConstSizedArray<glm::vec<n, T, Q>>  LoadAccessorArray(Sprites::Document const& doc, uint32_t i, glm::vec<n, T, Q>)
+immutable_array<glm::vec<n, T, Q>>  LoadAccessorArray(Sprites::Document const& doc, uint32_t i, glm::vec<n, T, Q>)
 {
 	fx::gltf::stdAccessor<T, n, glm::vec<n, T, Q> > accessor(doc, i);
 
-	CountedSizedArray<glm::vec<n, T, Q>> r(accessor.size());
+	shared_array<glm::vec<n, T, Q>> r(accessor.size());
 
 	for(auto i = 0u; i < r.size(); ++i)
 		r[i] = accessor[i];
@@ -51,7 +51,7 @@ ConstSizedArray<glm::vec<n, T, Q>>  LoadAccessorArray(Sprites::Document const& d
 }
 
 template<typename T>
-ConstSizedArray<T> UnpackMemo::GetAccessor(Sprites::Document const& doc, int i, std::vector<ConstSizedArray<T>> UnpackMemo::*array)
+immutable_array<T> UnpackMemo::GetAccessor(Sprites::Document const& doc, int i, std::vector<immutable_array<T>> UnpackMemo::*array)
 {
 	if(i < 0) return {};
 
@@ -64,17 +64,17 @@ ConstSizedArray<T> UnpackMemo::GetAccessor(Sprites::Document const& doc, int i, 
 	return ((this->*array)[i] = MakeUnique(LoadAccessorArray(doc, i, T())));
 }
 
-ConstSizedArray<glm::i16vec4> UnpackMemo::GetAccessor_i16vec4(Sprites::Document const& doc, int i)
+immutable_array<glm::i16vec4> UnpackMemo::GetAccessor_i16vec4(Sprites::Document const& doc, int i)
 {
 	return GetAccessor<glm::i16vec4>(doc, i, &UnpackMemo::m_i16vec4Accessors);
 }
 
-ConstSizedArray<glm::u16vec4> UnpackMemo::GetAccessor_u16vec4(Sprites::Document const& doc, int i)
+immutable_array<glm::u16vec4> UnpackMemo::GetAccessor_u16vec4(Sprites::Document const& doc, int i)
 {
 	return GetAccessor<glm::u16vec4>(doc, i, &UnpackMemo::m_u16vec4Accessors);
 }
 
-ConstSizedArray<glm::i16vec2> UnpackMemo::GetAccessor_i16vec2(Sprites::Document const& doc, int i)
+immutable_array<glm::i16vec2> UnpackMemo::GetAccessor_i16vec2(Sprites::Document const& doc, int i)
 {
 	return GetAccessor<glm::i16vec2>(doc, i, &UnpackMemo::m_i16vec2Accessors);
 }

@@ -4,30 +4,39 @@
 #
 #-------------------------------------------------
 
-QT += core gui widgets opengl openglwidgets
+QT += core gui
+CONFIG += c++2a
 
 TARGET = cheetah-texture-packer
-
-QT_VERSION=$$[QT_VERSION]
-
-contains(QT_VERSION, "^5.*") {
-  QT += widgets
-} else {
-}
-
 TEMPLATE = app
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+lessThan(QT_MAJOR_VERSION, 5):	  QT += opengl
+greaterThan(QT_MAJOR_VERSION, 5): QT += opengl openglwidgets
+
 INCLUDEPATH += src \
+	../../../Libraries/Spehleon/lib/ \
 	../../../Libraries/fx-gltf/src \
 	../../../Libraries/fx-gltf/test/thirdparty \
-	../../../Libraries/basis_universal/
+	../../../Libraries/basis_universal/ \
+	../../../Libraries/loguru \
+	../../../Libraries
 
-LIBS += -lGLEW -lGL -lGLU -ldrm
+LIBS += -lGLEW -lGL -lGLU -ldrm -lz \
+    -L\"/mnt/Passport/Libraries/lz4/build/cmake\" -llz4
 
-CONFIG += c++14
-
-DEFINES += CHEETAH=1 QT_DEPRECATED_WARNINGS GLM_EXT_INCLUDED \"_gl=gl->\"
+DEFINES += CHEETAH=1 QT_DEPRECATED_WARNINGS \"_gl=gl->\"
+DEFINES += GLM_EXT_INCLUDED GLM_FORCE_INLINE GLM_ENABLE_EXPERIMENTAL
 
 SOURCES += src/main.cpp\
+	../../../Libraries/Spehleon/lib/Support/counted_string.cpp \
+	../../../Libraries/Spehleon/lib/qt-gl/initialize_gl.cpp \
+	../../../Libraries/Spehleon/lib/qt-gl/simpleshaderbase.cpp \
+	../../../Libraries/Spehleon/lib/qt-gl/gl_viewwidget.cpp \
+	../../../Libraries/Spehleon/lib/qt-gl/viewparentinterface.cpp \
+	../../../Libraries/loguru/loguru.cpp \
+	../../../Libraries/Spehleon/lib/gl/compressedshadersource.cpp \
+	../../../Libraries/Spehleon/lib/gl/renderdoc.cpp \
 	../../../Libraries/fx-gltf/src/bufferinfo.cpp \
 	../../../Libraries/fx-gltf/src/fx/extensions/khr_materials.cpp \
 	../../../Libraries/fx-gltf/src/fx/extensions/msft_texture_dds.cpp \
@@ -56,9 +65,9 @@ SOURCES += src/main.cpp\
 	src/Sprite/imagetexturecoordinates.cpp \
 	src/Sprite/material.cpp \
 	src/Sprite/object.cpp \
+	src/Sprite/spritecutter.cpp \
 	src/Sprite/spritejson.cpp \
 	src/Sprite/spritesheet.cpp \
-	src/Support/counted_string.cpp \
 	src/Support/getuniquecountedarray.cpp \
 	src/Support/imagesupport.cpp \
 	src/Support/packaccessor.cpp \
@@ -82,6 +91,19 @@ SOURCES += src/main.cpp\
     src/rc_crc32.c
 
 HEADERS  += src/mainwindow.h \
+	../../../Libraries/Spehleon/lib/Support/counted_string.h \
+	../../../Libraries/Spehleon/lib/Support/counted_ptr.hpp \
+	../../../Libraries/Spehleon/lib/Support/shared_array.hpp \
+	../../../Libraries/Spehleon/lib/Support/lockfreequeue.hpp \
+	../../../Libraries/Spehleon/lib/Support/numeric_range.hpp \
+	../../../Libraries/Spehleon/lib/Support/singleton_base.hpp \
+	../../../Libraries/Spehleon/lib/Support/unsafe_view.hpp \
+	../../../Libraries/Spehleon/lib/gl/compressedshadersource.h \
+	../../../Libraries/Spehleon/lib/gl/renderdoc.h \
+	../../../Libraries/Spehleon/lib/qt-gl/gl_viewwidget.h \
+	../../../Libraries/Spehleon/lib/qt-gl/initialize_gl.h \
+	../../../Libraries/Spehleon/lib/qt-gl/simpleshaderbase.h \
+	../../../Libraries/Spehleon/lib/qt-gl/viewparentinterface.h \
 	../../../Libraries/fx-gltf/src/accessorreader.hpp \
 	../../../Libraries/fx-gltf/src/accessortypeinfo.hpp \
 	../../../Libraries/fx-gltf/src/bufferinfo.h \
@@ -114,11 +136,9 @@ HEADERS  += src/mainwindow.h \
 	src/Sprite/imagetexturecoordinates.h \
 	src/Sprite/material.h \
 	src/Sprite/object.h \
+	src/Sprite/spritecutter.h \
 	src/Sprite/spritejson.h \
 	src/Sprite/spritesheet.h \
-	src/Support/counted_ptr.hpp \
-	src/Support/counted_string.h \
-	src/Support/countedsizedarray.hpp \
 	src/Support/getuniquecountedarray.h \
 	src/Support/glm_iostream.hpp \
 	src/Support/imagesupport.h \

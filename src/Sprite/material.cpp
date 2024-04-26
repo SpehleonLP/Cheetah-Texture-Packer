@@ -165,21 +165,21 @@ std::string Material::IsImageCompatible(Material::Tex tex, counted_ptr<Image> im
 template<typename T>
 void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, std::vector<T> const& array)
 {
-	_gl glBindBuffer(type, vbo); DEBUG_GL
-	_gl glBufferData(type, array.size() * sizeof(array[0]), array.data(), GL_DYNAMIC_DRAW); DEBUG_GL
+	_gl glBindBuffer(type, vbo);
+	_gl glBufferData(type, array.size() * sizeof(array[0]), array.data(), GL_DYNAMIC_DRAW);
 };
 
 template<typename T>
-void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, ConstSizedArray<T> array)
+void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, immutable_array<T> array)
 {
-	_gl glBindBuffer(type, vbo); DEBUG_GL
-	_gl glBufferData(type, array.size() * sizeof(array[0]), array.data(), GL_DYNAMIC_DRAW); DEBUG_GL
+	_gl glBindBuffer(type, vbo);
+	_gl glBufferData(type, array.size() * sizeof(array[0]), array.data(), GL_DYNAMIC_DRAW);
 };
 
 template<typename T, typename Function>
-CountedSizedArray<T>  CreateArray(size_t length, Function func)
+shared_array<T>  CreateArray(size_t length, Function func)
 {
-	CountedSizedArray<T> r(length);
+	shared_array<T> r(length);
 
 	for(auto i = 0u; i < r.size(); ++i)
 		r[i] = func(i);
@@ -206,9 +206,9 @@ std::vector<uint16_t>  CreateSquareIndices(size_t length)
 }
 
 
-ConstSizedArray<glm::vec2>  Material::CreateNormalizedPositions() const
+immutable_array<glm::vec2>  Material::CreateNormalizedPositions() const
 {
-	CountedSizedArray<glm::vec2> r(m_spriteCount * 4);
+	shared_array<glm::vec2> r(m_spriteCount * 4);
 
 	auto m_sprites = m_texCoords->sprites();
 	auto m_crop   = m_texCoords->sprites();
@@ -234,18 +234,18 @@ ConstSizedArray<glm::vec2>  Material::CreateNormalizedPositions() const
 template<typename T>
 void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, std::vector<T> const& vec, GLenum draw_type)
 {
-	_gl glBindBuffer(type, vbo); DEBUG_GL
+	_gl glBindBuffer(type, vbo);
 	_gl glBufferData(type, vec.size() * sizeof(T), vec.data(), draw_type);
-	DEBUG_GL
+
 }
 
 
 template<typename T>
-void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, ConstSizedArray<T> const& vec, GLenum draw_type)
+void UploadData(GLViewWidget* gl, GLenum type, uint32_t vbo, immutable_array<T> const& vec, GLenum draw_type)
 {
-	_gl glBindBuffer(type, vbo); DEBUG_GL
+	_gl glBindBuffer(type, vbo);
 	_gl glBufferData(type, vec.size() * sizeof(T), vec.data(), draw_type);
-	DEBUG_GL
+
 }
 
 std::vector<short> Material::CreateIdBuffer() const
@@ -275,7 +275,7 @@ void Material::CreateDefaultArrays(GLViewWidget* gl)
 	m_spriteIndices   = CreateArray<Pair>(m_spriteCount, [](uint16_t i) { return Pair{(uint16_t)(i*6), 6}; });
 	m_spriteVertices  = CreateArray<Pair>(m_spriteCount, [](uint16_t i) { return Pair{(uint16_t)(i*4), 4}; });
 
-	_gl glBindVertexArray(m_vao); DEBUG_GL
+	_gl glBindVertexArray(m_vao);
 
 //	v_sheetCoordBegin,
 //	v_sheetCoordEnd = v_sheetCoordBegin + (int)Tex::Total,
@@ -285,13 +285,13 @@ void Material::CreateDefaultArrays(GLViewWidget* gl)
 		std::unique_ptr<uint8_t[], void (*)(void*)> ptr((uint8_t*)calloc(m_spriteCount * 4 * sizeof(glm::u16vec4), 1), &std::free);
 
 //	v_texCoord,
-		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[v_texCoord]); DEBUG_GL
-		_gl glBufferData(GL_ARRAY_BUFFER, m_spriteCount * 4 * sizeof(glm::u16vec4), &ptr[0], GL_DYNAMIC_DRAW); DEBUG_GL
+		_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[v_texCoord]);
+		_gl glBufferData(GL_ARRAY_BUFFER, m_spriteCount * 4 * sizeof(glm::u16vec4), &ptr[0], GL_DYNAMIC_DRAW);
 
 		for(uint32_t i = v_sheetCoordBegin; i < v_sheetCoordEnd; ++i)
 		{
-			_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[i]); DEBUG_GL
-			_gl glBufferData(GL_ARRAY_BUFFER, m_spriteCount * 4 * sizeof(glm::vec2), &ptr[0], GL_DYNAMIC_DRAW); DEBUG_GL
+			_gl glBindBuffer(GL_ARRAY_BUFFER, m_vbo[i]);
+			_gl glBufferData(GL_ARRAY_BUFFER, m_spriteCount * 4 * sizeof(glm::vec2), &ptr[0], GL_DYNAMIC_DRAW);
 		}
 	}
 
@@ -318,7 +318,7 @@ void Material::Prepare(GLViewWidget* gl)
 		if(!m_vao)
 			return;
 
-		DEBUG_GL;
+		;
 
 //sprite sheet
 		_gl glBindVertexArray(m_vao);
@@ -342,7 +342,7 @@ void Material::Prepare(GLViewWidget* gl)
 		for(int i = 0; i < v_indices; ++i)
 			_gl glEnableVertexAttribArray(i);
 
-		GL_ASSERT;
+		
 
 		created = true;
 	}
@@ -396,7 +396,7 @@ void Material::Prepare(GLViewWidget* gl)
 		}
 	}
 
-	DEBUG_GL
+
 }
 
 void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
@@ -449,7 +449,7 @@ void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
 	_gl glDisable(GL_DEPTH_TEST);
 	_gl glDrawElements(GL_TRIANGLES, db.elements, GL_UNSIGNED_SHORT, db.offset());
 
-	GL_ASSERT;
+	
 }
 
 glm::vec2 Material::SpriteSize(int it) const
@@ -491,16 +491,16 @@ void Material::RenderSpriteSheet(GLViewWidget * gl, Material::Tex image_slot, in
 	UnlitShader::Shader.bindLayer(gl, 8);
 	UnlitShader::Shader.bindCenter(gl, db.center);
 
-	UnlitShader::Shader.bindColor(gl, glm::vec4(1, 1, 1, 1)); DEBUG_GL
-	UnlitShader::Shader.bindTexCoords(gl, TexCoord(image_slot)); DEBUG_GL
+	UnlitShader::Shader.bindColor(gl, glm::vec4(1, 1, 1, 1));
+	UnlitShader::Shader.bindTexCoords(gl, TexCoord(image_slot));
 
-	_gl glActiveTexture(GL_TEXTURE0); DEBUG_GL
-	_gl glBindTexture(GL_TEXTURE_2D, image_slots[(int)image_slot]->GetTexture()); DEBUG_GL
+	_gl glActiveTexture(GL_TEXTURE0);
+	_gl glBindTexture(GL_TEXTURE_2D, image_slots[(int)image_slot]->GetTexture());
 
-	_gl glDisable(GL_DEPTH_TEST); DEBUG_GL
-	_gl glDrawElements(GL_TRIANGLES, db.elements, GL_UNSIGNED_SHORT, db.offset()); DEBUG_GL
+	_gl glDisable(GL_DEPTH_TEST);
+	_gl glDrawElements(GL_TRIANGLES, db.elements, GL_UNSIGNED_SHORT, db.offset());
 
-	DEBUG_GL
+
 }
 
 RenderData Material::GetRenderData(int frame)

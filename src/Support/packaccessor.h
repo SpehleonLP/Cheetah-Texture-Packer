@@ -1,7 +1,7 @@
 #ifndef PACKACCESSOR_H
 #define PACKACCESSOR_H
 #include <fx/gltf.h>
-#include "Support/countedsizedarray.hpp"
+#include "Support/shared_array.hpp"
 #include <componenttypeinfo.hpp>
 #include <glm/vec4.hpp>
 #include <vector>
@@ -69,11 +69,11 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 	}
 
 	template<int S, typename T, glm::qualifier Q>
-	int32_t PackAccessor(ConstSizedArray<glm::vec<S, T, Q>> const& array, bool normalize = false)
+	int32_t PackAccessor(immutable_array<glm::vec<S, T, Q>> const& array, bool normalize = false)
 		{ return PackAccessor<S, T, Q>(array.data(), array.size(), normalize, false); }
 
 	template<typename T>
-	int32_t PackAccessor(ConstSizedArray<T> const& array, bool normalize = false)
+	int32_t PackAccessor(immutable_array<T> const& array, bool normalize = false)
 		{ return PackAccessor<T>(array.data(), array.size(), sizeof(T), normalize, false); }
 
 	template<int S, typename T, glm::qualifier Q>
