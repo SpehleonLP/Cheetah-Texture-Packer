@@ -35,6 +35,7 @@ Object::Object(ImageManager * gl, Sprites::Sprite const& spr, Sprites::Document 
 		r->fps        = spr.animations[i].fps;
 		r->loop_start = spr.animations[i].loop_start;
 		r->loop_end   = spr.animations[i].loop_end;
+		r->base		  = spr.animations[i].base;
 
 		if(!spr.animations[i].frames.empty())
 			r->frames = shared_array<uint16_t>::FromArray(
@@ -66,6 +67,22 @@ Object::Object(ImageManager * gl, Sprites::Sprite const& spr, Sprites::Document 
 Object::Object(GLViewWidget * gl) : gl(gl) {}
 Object::~Object() { material->Clear(gl); }
 
+
+bool Object::CheckIfValid(immutable_array<uint16_t> frames, uint16_t base) const
+{
+
+	auto N = noFrames();
+
+	for(uint32_t i = 0; i < frames.size(); ++i)
+	{
+		if(i+base > N)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
 
 int Object::PackDocument(Sprites::Document & doc, PackMemo & memo)
 {
@@ -156,6 +173,7 @@ void Object::UpdateImages(Document* doc)
 			material.TexCoord((Material::Tex)*p) = 0;
 		else
 		{
+			BreakIfDebugging();
 			throw std::logic_error("Sprites do not properly align.");
 		}
 	}

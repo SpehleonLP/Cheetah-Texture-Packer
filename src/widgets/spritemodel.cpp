@@ -105,7 +105,10 @@ SpriteModel::SpriteModel(MainWindow * parent) :
 	for(int i = 0;  !i || (int)model[i].property != 0; ++i)
 	{
 		if((int)model[i].property != i)
+		{
+			BreakIfDebugging();
 			throw std::logic_error("material model corrupt");
+		}
 	}
 
 }
@@ -308,7 +311,7 @@ int SpriteModel::rowCount(const QModelIndex &parent) const
 		else if((uint32_t)entity.numeric >= vec.size())
 			return 0;
 		else
-			return 2;
+			return (int)Animation::Field::Total;
 	}
 	case Heirarchy::Attachment:
 	{
@@ -458,19 +461,24 @@ QVariant SpriteModel::data(const QModelIndex &index, int role) const
 
 			if(entity.subId < 0)
 				return anim->name.c_str();
-			else if(entity.subId == 0)
+
+			if(index.column() == 0 && (uint32_t)entity.subId < Animation::FieldLabels.size())
+				return Animation::FieldLabels[entity.subId];
+
+			switch((Animation::Field)entity.subId)
 			{
-				if(index.column() == 0)
-					return "Frame List";
-				else
-					return StringFromVector(anim->frames);
-			}
-			else
-			{
-				if(index.column() == 0)
-					return "FPS";
-				else
-					return QString::number(anim->fps);
+			case Animation::Field::Base:
+				return QString::number(anim->base);
+			case Animation::Field::Frames:
+				return StringFromVector(anim->frames);
+			case Animation::Field::LoopStart:
+				return QString::number(anim->loop_start);
+			case Animation::Field::LoopEnd:
+				return QString::number(anim->loop_end);
+			case Animation::Field::FPS:
+				return QString::number(anim->fps);
+			default:
+				break;
 			}
 		}
 	} return QVariant();
@@ -501,8 +509,15 @@ QVariant SpriteModel::data(const QModelIndex &index, int role) const
 //	bool setHeaderData(int, Qt::Orientation, QVariant const&, int);
 bool SpriteModel::setData(QModelIndex const& index,  QVariant const& variant, int role)
 {
+	bool okay{};
+	union
+	{
+		int64_t Int;
+		double Dbl;
+	};
+
 	Entity entity = index.internalPointer();
-	auto doc = window->document.get();
+	Document * doc = window->document.get();
 
 	if(!index.isValid()
 	|| role != Qt::EditRole)
@@ -542,29 +557,14 @@ bool SpriteModel::setData(QModelIndex const& index,  QVariant const& variant, in
 
 			if(entity.subId < 0)
 				anim.name = counted_string::MakeUnique(value.toStdString());
-			else if(entity.subId == 0)
+
+			QString what;
+			if(!anim.SetField((Animation::Field)entity.subId, value, doc->objects[entity.object].get(), &what))
 			{
-				if(!VectorFromString(anim.frames, value))
-					return false;
+				if(what.isEmpty() == false)
+					QMessageBox::warning(window, "Cheetah Animation", what);
 
-				auto N = doc->objects[entity.object]->noFrames();
-
-				for(uint32_t i = 0; i < anim.frames.size(); ++i)
-				{
-					if(i > N)
-					{
-						QMessageBox::warning(window, "Cheetah Animation", "frame id greater than total frames in sprite sheet");
-						return false;
-					}
-				}
-
-			}
-			else
-			{
-				bool okay{};
-				float fps = value.toFloat(&okay);
-				if(!okay) return false;
-				anim.fps = fps;
+				return false;
 			}
 		}
 

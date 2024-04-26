@@ -56,13 +56,13 @@ struct Document
 		try
 		{
 			r = std::make_unique<T>(this, std::move(args)...);
+			return addCommand(std::move(r));
 		}
 		catch(std::exception& e)
 		{
 			OnError(e.what());
+			return nullptr;
 		}
-
-		return addCommand(std::move(r));
 	}
 
 	CommandInterface * addCommand(std::unique_ptr<CommandInterface> );

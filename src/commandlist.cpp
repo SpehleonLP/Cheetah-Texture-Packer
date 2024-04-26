@@ -1,3 +1,4 @@
+#include "universal_include.h"
 #include "commandlist.h"
 
 ObjectCommand::ObjectCommand(Document * doc, int obj, counted_string insert) :
@@ -128,6 +129,7 @@ void AnimationCommand::RemoveAnimation()
 		}
 	}
 
+	BreakIfDebugging();
 	throw std::logic_error("tried to delete animation which does not exist...");
 }
 

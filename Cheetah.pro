@@ -42,6 +42,7 @@ SOURCES += src/main.cpp\
 	../../../Libraries/fx-gltf/src/fx/extensions/msft_texture_dds.cpp \
 	../../../Libraries/fx-gltf/src/fx/gltf.cpp \
 	../../../Libraries/fx-gltf/src/gltf_stl_accessor.cpp \
+	errordialog.cpp \
 	src/Import/import_c16.cpp \
 	src/Import/linearizesprite.cpp \
 	src/Import/packspritesheet.cpp \
@@ -104,6 +105,7 @@ HEADERS  += src/mainwindow.h \
 	../../../Libraries/Spehleon/lib/qt-gl/initialize_gl.h \
 	../../../Libraries/Spehleon/lib/qt-gl/simpleshaderbase.h \
 	../../../Libraries/Spehleon/lib/qt-gl/viewparentinterface.h \
+	../../../Libraries/Spehleon/lib/universal_include.h \
 	../../../Libraries/fx-gltf/src/accessorreader.hpp \
 	../../../Libraries/fx-gltf/src/accessortypeinfo.hpp \
 	../../../Libraries/fx-gltf/src/bufferinfo.h \
@@ -113,6 +115,7 @@ HEADERS  += src/mainwindow.h \
 	../../../Libraries/fx-gltf/src/fx/gltf.h \
 	../../../Libraries/fx-gltf/src/fx/gltf_forward.hpp \
 	../../../Libraries/fx-gltf/src/gltf_stl_accessor.h \
+	errordialog.h \
 	src/Import/import_c16.h \
 	src/Import/linearizesprite.h \
 	src/Import/packspritesheet.h \
@@ -164,5 +167,6 @@ HEADERS  += src/mainwindow.h \
     src/qimageptr.hpp \
     src/rc_crc32.h
 
-FORMS    += src/mainwindow.ui
+FORMS    += src/mainwindow.ui \
+	errordialog.ui
 

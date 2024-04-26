@@ -56,6 +56,7 @@ struct Animation
 	float                 fps{20};
 	uint16_t              loop_start{0};
 	uint16_t              loop_end{0};
+	uint32_t			  base{0};
 
 	nlohmann::json extensionsAndExtras{};
 };

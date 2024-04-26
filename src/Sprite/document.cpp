@@ -1,4 +1,5 @@
 #include "document.h"
+#include "errordialog.h"
 #include "mainwindow.h"
 #include "Sprite/object.h"
 #include "ui_mainwindow.h"
@@ -51,7 +52,8 @@ void Document::editRedo()
 
 void Document::OnError(std::string const& what)
 {
-	m_window->DisplayError(what);
+	ErrorDialog error(m_window, QString::fromStdString(what));
+	error.exec();
 }
 
 Sprites::Document Document::PackDocument()
@@ -170,7 +172,7 @@ void Document::RenderAnimation(GLViewWidget * gl,  Object* object, int id)
 		return;
 	}
 
-	auto anim = object->animations[id].get();
+	Animation * anim = object->animations[id].get();
 
 	if(anim != animation)
 	{
@@ -185,7 +187,7 @@ void Document::RenderAnimation(GLViewWidget * gl,  Object* object, int id)
 	time *= 1e-6;
 	int frame = anim->frames[(int)(time * anim->fps) % anim->frames.size()];
 
-	object->RenderObjectSheet(gl, frame);
+	object->RenderObjectSheet(gl, frame + anim->base);
 }
 
 GLViewWidget * Document::GetViewWidget() const

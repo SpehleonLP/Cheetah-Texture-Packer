@@ -40,6 +40,8 @@ struct Object
 	void RenderAttachments(GLViewWidget *, int attachment = -1);
 	void SetAttachment(int selected_attachment, glm::ivec2 position);
 
+	bool CheckIfValid(immutable_array<uint16_t> frames, uint16_t base) const;
+
 	inline std::string IsImageCompatible(counted_ptr<Image> const& image, Material::Tex slot) { return material->IsImageCompatible(slot, image); }
 	inline void SetImage(counted_ptr<Image> const& image, counted_ptr<Image> * slot) { material->SetImage(image, slot); }
 

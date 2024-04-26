@@ -5,6 +5,7 @@
 #include <fx/extensions/khr_materials.h>
 #include "Support/counted_ptr.hpp"
 #include "spritesheet.h"
+#include "universal_include.h"
 
 struct Document;
 class SpriteSheet;
@@ -130,6 +131,7 @@ typedef std::array<counted_ptr<Image>, (int)Tex::Total>						ImageSlot_t;
 		case Tex::Occlusion:			return occlusionTexture.texCoord;
 		case Tex::Emission:				return emissiveTexture.texCoord;
 		default:
+			BreakIfDebugging();
 			throw std::logic_error("Unknown material map value.");
 		}
 
