@@ -20,7 +20,32 @@ INCLUDEPATH += src \
 	../../../Libraries/fx-gltf/test/thirdparty \
 	../../../Libraries/basis_universal/ \
 	../../../Libraries/loguru \
-	../../../Libraries
+	../../../Libraries \
+	/usr/include/gtk-3.0 \
+	/usr/include/at-spi2-atk/2.0 \
+	/usr/include/at-spi-2.0 \
+	/usr/include/dbus-1.0 \
+	/usr/lib/x86_64-linux-gnu/dbus-1.0/include \
+	/usr/include/gtk-3.0 \
+	/usr/include/gio-unix-2.0 \
+	/usr/include/cairo \
+	/usr/include/pango-1.0 \
+	/usr/include/harfbuzz \
+	/usr/include/pango-1.0 \
+	/usr/include/fribidi \
+	/usr/include/harfbuzz \
+	/usr/include/atk-1.0 \
+	/usr/include/cairo \
+	/usr/include/pixman-1 \
+	/usr/include/uuid \
+	/usr/include/freetype2 \
+	/usr/include/gdk-pixbuf-2.0 \
+	/usr/include/libpng16 \
+	/usr/include/x86_64-linux-gnu \
+	/usr/include/libmount \
+	/usr/include/blkid \
+	/usr/include/glib-2.0 \
+	/usr/lib/x86_64-linux-gnu/glib-2.0/include
 
 LIBS += -lGLEW -lGL -lGLU -ldrm -lz \
     -L\"/mnt/Passport/Libraries/lz4/build/cmake\" -llz4
@@ -29,6 +54,11 @@ DEFINES += CHEETAH=1 QT_DEPRECATED_WARNINGS \"_gl=gl->\"
 DEFINES += GLM_EXT_INCLUDED GLM_FORCE_INLINE GLM_ENABLE_EXPERIMENTAL
 
 SOURCES += src/main.cpp\
+	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog.cpp \
+	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog_gtk.cpp \
+	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog_macos.cpp \
+	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog_qt.cpp \
+	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog_win32.cpp \
 	../../../Libraries/Spehleon/lib/Support/counted_string.cpp \
 	../../../Libraries/Spehleon/lib/qt-gl/initialize_gl.cpp \
 	../../../Libraries/Spehleon/lib/qt-gl/simpleshaderbase.cpp \
@@ -92,6 +122,7 @@ SOURCES += src/main.cpp\
     src/rc_crc32.c
 
 HEADERS  += src/mainwindow.h \
+	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog.h \
 	../../../Libraries/Spehleon/lib/Support/counted_string.h \
 	../../../Libraries/Spehleon/lib/Support/counted_ptr.hpp \
 	../../../Libraries/Spehleon/lib/Support/shared_array.hpp \
