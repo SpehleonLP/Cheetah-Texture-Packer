@@ -417,7 +417,8 @@ void Material::RenderObjectSheet(GLViewWidget * gl, int frame)
 
 	Prepare(gl);
 	auto db = GetRenderData(frame);
-	RenderSheetBackdrop(gl, db);
+	if(!RenderSheetBackdrop(gl, db))
+		return;
 
 	if(m_vao == 0) return;
 
@@ -477,7 +478,8 @@ void Material::RenderSpriteSheet(GLViewWidget * gl, Material::Tex image_slot, in
 
 	Prepare(gl);
 	auto db = GetRenderData(frame);
-	RenderSheetBackdrop(gl, db);
+	if(!RenderSheetBackdrop(gl, db))
+		return;
 
 	if(m_vao == 0) return;
 
@@ -539,13 +541,14 @@ bool Material::PrepareSheetBackdrop()
 	return true;
 }
 
-void Material::RenderSheetBackdrop(GLViewWidget * gl, RenderData const& db)
+bool Material::RenderSheetBackdrop(GLViewWidget * gl, RenderData const& db)
 {
 	if(PrepareSheetBackdrop() == false)
-		return;
+		return false;
 
 	m_spriteSheet->Prepare(gl, m_texCoords->sprites(), m_sheetSize);
 	m_spriteSheet->RenderSheet(gl, db);
+	return true;
 }
 
 

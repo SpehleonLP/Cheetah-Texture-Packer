@@ -381,7 +381,7 @@ QVariant SpriteModel::data(const QModelIndex &index, int role) const
 	Entity entity = index.internalPointer();
 	auto doc = window->document.get();
 
-	if (role != Qt::DisplayRole
+	if ((role != Qt::DisplayRole && role != Qt::EditRole)
 	|| !index.isValid())
         return QVariant();
 

@@ -153,7 +153,7 @@ private:
 	void CreatePositionsFromNormalizedPositions(GLViewWidget * gl);
 
 	RenderData GetRenderData(int frame);
-	void RenderSheetBackdrop(GLViewWidget * gl, RenderData const& frame);
+	bool RenderSheetBackdrop(GLViewWidget * gl, RenderData const& frame);
 	bool PrepareSheetBackdrop();
 
 	struct Pair

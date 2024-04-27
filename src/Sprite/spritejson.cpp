@@ -60,6 +60,9 @@ inline void from_json(nlohmann::json const & json, Animation & db)
 	ReadRequiredField("name",   json, db.name);
 	ReadRequiredField("frames", json, db.frames);
 	ReadRequiredField("fps",    json, db.fps);
+	ReadOptionalField("base",    json, db.base);
+	ReadOptionalField("loopStart",    json, db.loop_start);
+	ReadOptionalField("loopEnd",    json, db.loop_end);
 
 	detail::ReadExtensionsAndExtras(json, db.extensionsAndExtras);
 }
@@ -69,6 +72,9 @@ inline void to_json(nlohmann::json & json, Animation const& db)
 	WriteQuick("name",   json, db.name);
 	WriteQuick("frames", json, db.frames);
 	WriteQuick("fps",    json, db.fps, 29.97f);
+	WriteQuick("base",    json, db.base, 0u);
+	WriteQuick("loopStart",    json, db.loop_start, (uint16_t)0);
+	WriteQuick("loopEnd",    json, db.loop_end, (uint16_t)-1);
 
 	detail::WriteExtensions(json, db.extensionsAndExtras);
 }
