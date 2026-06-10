@@ -208,7 +208,7 @@ Document LoadFromBinary(std::vector<uint8_t> binary, std::string const & documen
 
 	return detail::Create(
 		nlohmann::json::parse({ &binary[detail::HeaderSize], header.jsonHeader.chunkLength }),
-		{ detail::GetDocumentRootPath(documentFilePath), readQuotas, &binary, header.jsonHeader.chunkLength + detail::HeaderSize },
+		{ detail::GetDocumentRootPath(documentFilePath), readQuotas, binary, header.jsonHeader.chunkLength + detail::HeaderSize },
 			skip_buffers);
 }
 

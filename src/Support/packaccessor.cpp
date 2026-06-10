@@ -19,7 +19,7 @@ int32_t PackMemo::PackBufferView(uint8_t * ptr, uint32_t size, bool take_memory)
 	buffer.byteStride	= 0;
 	buffer.interleaved	= false;
 	buffer.ownsData     = take_memory;
-	buffer.targetType	= TargetType::None;
+	buffer.targetType	= fx_TargetType::None;
 
 	int r = m_buffers.size();
 	m_buffers.push_back(std::move(buffer));
@@ -45,7 +45,7 @@ int32_t PackMemo::PackIndices(uint16_t * ptr, uint32_t size, bool take_memory)
 	buffer.byteStride	= 0;
 	buffer.interleaved	= false;
 	buffer.ownsData     = take_memory;
-	buffer.targetType	= TargetType::ElementArrayBuffer;
+	buffer.targetType	= fx_TargetType::ElementArrayBuffer;
 
 	int r = m_buffers.size();
 	m_buffers.push_back(std::move(buffer));
@@ -53,8 +53,8 @@ int32_t PackMemo::PackIndices(uint16_t * ptr, uint32_t size, bool take_memory)
 	AccessorMemo accessor;
 
 	accessor.bufferView		= r;
-	accessor.type			= Type::Scalar;
-	accessor.componentType  = ComponentType::UnsignedShort;
+	accessor.type			= fx_Type::Scalar;
+	accessor.componentType  = fx_ComponentType::UnsignedShort;
 	accessor.count			= size;
 
 	assert(accessor.count != 0);
@@ -67,7 +67,7 @@ int32_t PackMemo::PackIndices(uint16_t * ptr, uint32_t size, bool take_memory)
 
 }
 
-int32_t PackMemo::PackAccessor(const void * ptr, uint32_t size, uint32_t elementSize, ComponentType component_type, Type type, bool normalize, bool take_memory)
+int32_t PackMemo::PackAccessor(const void * ptr, uint32_t size, uint32_t elementSize, fx_ComponentType component_type, fx_Type type, bool normalize, bool take_memory)
 {
 	BufferPtr buffer;
 	buffer.data			= (uint8_t*)ptr;
@@ -76,7 +76,7 @@ int32_t PackMemo::PackAccessor(const void * ptr, uint32_t size, uint32_t element
 	buffer.byteStride	= 0;
 	buffer.interleaved	= false;
 	buffer.ownsData     = take_memory;
-	buffer.targetType	= TargetType::ArrayBuffer;
+	buffer.targetType	= fx_TargetType::ArrayBuffer;
 
 	int r = m_buffers.size();
 	m_buffers.push_back(std::move(buffer));
@@ -141,7 +141,7 @@ void PackMemo::PackDocument(Sprites::Document & doc)
 
 		view.byteOffset = doc.buffers[0].data.size();
 		view.byteOffset += ((view.byteOffset % 4) != 0) * (4 - (view.byteOffset % 4));
-		view.target     =  TargetType::ArrayBuffer;
+		view.target     =  fx_TargetType::ArrayBuffer;
 
 		int total_items = -1;
 

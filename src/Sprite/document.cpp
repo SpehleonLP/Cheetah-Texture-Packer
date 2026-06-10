@@ -1,5 +1,5 @@
 #include "document.h"
-#include "errordialog.h"
+#include "Windows/errordialog.h"
 #include "mainwindow.h"
 #include "Sprite/object.h"
 #include "ui_mainwindow.h"
@@ -14,6 +14,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <QMessageBox>
 
+namespace loguru {
+std::string stacktrace_as_stdstring(int skip_from, int skip);
+}
 
 CommandInterface * Document::addCommand(std::unique_ptr<CommandInterface> it)
 {
@@ -52,8 +55,8 @@ void Document::editRedo()
 
 void Document::OnError(std::string const& what)
 {
-	ErrorDialog error(m_window, QString::fromStdString(what));
-	error.exec();
+	auto trace = loguru::stacktrace_as_stdstring(2, 6);
+	Error::DisplayError("Error", what.c_str(), trace.c_str(), Error::Buttons::Ignore);
 }
 
 Sprites::Document Document::PackDocument()

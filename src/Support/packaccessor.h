@@ -2,7 +2,7 @@
 #define PACKACCESSOR_H
 #include <fx/gltf.h>
 #include "Support/shared_array.hpp"
-#include <componenttypeinfo.hpp>
+#include "gltf/fx-gltf-accessor.h"
 #include <glm/vec4.hpp>
 #include <vector>
 
@@ -13,9 +13,9 @@ struct Document;
 
 struct PackMemo
 {
-typedef fx::gltf::Accessor::ComponentType ComponentType;
-typedef fx::gltf::Accessor::Type		  Type;
-typedef fx::gltf::BufferView::TargetType  TargetType;
+typedef fx::gltf::Accessor::ComponentType fx_ComponentType;
+typedef fx::gltf::Accessor::Type		  fx_Type;
+typedef fx::gltf::BufferView::TargetType  fx_TargetType;
 
 	int32_t PackBufferView(uint8_t * ptr, uint32_t size, bool take_memory);
 	void PackDocument(Sprites::Document & doc);
@@ -27,8 +27,6 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 	{
 		if(length == 0) return -1;
 
-		static_assert(ComponentTypeId<T>::ComponentType != 0, "unidentified component type");
-
 		auto itr = m_knownAccessors.find(array);
 
 		if(itr != m_knownAccessors.end())
@@ -37,8 +35,8 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 
 		auto value = PackAccessor(
 			(void*)array, length, sizeof(glm::vec<S, T, Q>),
-			(ComponentType)ComponentTypeId<T>::ComponentType,
-			(Type)S,
+			(fx_ComponentType)fx::ComponentValue<T>::value,
+			(fx_Type)S,
 			normalize, take_memory);
 
 		m_knownAccessors[array] = value;
@@ -51,8 +49,7 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 		if(length == 0) return -1;
 
 		static_assert(std::is_fundamental<T>::value);
-		static_assert(ComponentTypeId<T>::ComponentType != 0, "unidentified component type");
-
+		
 		auto itr = m_knownAccessors.find(array);
 
 		if(itr != m_knownAccessors.end())
@@ -60,8 +57,8 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 
 		auto value = PackAccessor(
 			(void*)array, length, sizeof(T),
-			(ComponentType)ComponentTypeId<T>::ComponentType,
-			(Type)1,
+			(fx_ComponentType)fx::ComponentValue<T>::value,
+			(fx_Type)1,
 			normalize, take_memory);
 
 		m_knownAccessors[array] = value;
@@ -84,7 +81,7 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 	int32_t PackAccessor(std::vector<T> const& array, bool normalize = false)
 		{ return PackAccessor<T>(array.data(), array.size(), sizeof(T), normalize, false); }
 
-	int32_t PackAccessor(void const* array, uint32_t length, uint32_t elementSize, ComponentType, Type, bool normalize, bool take_memory);
+	int32_t PackAccessor(void const* array, uint32_t length, uint32_t elementSize, fx_ComponentType, fx_Type, bool normalize, bool take_memory);
 
 	struct BufferPtr
 	{
@@ -103,7 +100,7 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 		uint16_t byteStride{};
 		bool	 interleaved{};
 		bool	 ownsData{};
-		TargetType    targetType{};
+		fx_TargetType    targetType{};
 	};
 
 	struct AccessorMemo
@@ -112,9 +109,9 @@ typedef fx::gltf::BufferView::TargetType  TargetType;
 		bool operator!=(AccessorMemo const& it) const { return !(*this == it); }
 
 		int32_t		  bufferView{};
-		Type		  type{Type::None};
+		fx_Type		  type{fx_Type::None};
 		bool		  normalize{};
-		ComponentType componentType{ComponentType::None};
+		fx_ComponentType componentType{fx_ComponentType::None};
 		uint32_t      byteOffset{};
 		uint32_t	  count{};
 	};

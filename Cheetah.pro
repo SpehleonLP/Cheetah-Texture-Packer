@@ -54,11 +54,8 @@ DEFINES += CHEETAH=1 QT_DEPRECATED_WARNINGS \"_gl=gl->\"
 DEFINES += GLM_EXT_INCLUDED GLM_FORCE_INLINE GLM_ENABLE_EXPERIMENTAL
 
 SOURCES += src/main.cpp\
-	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog.cpp \
-	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog_gtk.cpp \
-	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog_macos.cpp \
-	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog_qt.cpp \
-	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog_win32.cpp \
+	../../../Libraries/Spehleon/lib/Windows/errordialog.cpp \
+	src/Support/windowsystemthread_stub.cpp \
 	../../../Libraries/Spehleon/lib/Support/counted_string.cpp \
 	../../../Libraries/Spehleon/lib/qt-gl/initialize_gl.cpp \
 	../../../Libraries/Spehleon/lib/qt-gl/simpleshaderbase.cpp \
@@ -67,12 +64,9 @@ SOURCES += src/main.cpp\
 	../../../Libraries/loguru/loguru.cpp \
 	../../../Libraries/Spehleon/lib/gl/compressedshadersource.cpp \
 	../../../Libraries/Spehleon/lib/gl/renderdoc.cpp \
-	../../../Libraries/fx-gltf/src/bufferinfo.cpp \
 	../../../Libraries/fx-gltf/src/fx/extensions/khr_materials.cpp \
 	../../../Libraries/fx-gltf/src/fx/extensions/msft_texture_dds.cpp \
 	../../../Libraries/fx-gltf/src/fx/gltf.cpp \
-	../../../Libraries/fx-gltf/src/gltf_stl_accessor.cpp \
-	errordialog.cpp \
 	src/Import/import_c16.cpp \
 	src/Import/linearizesprite.cpp \
 	src/Import/packspritesheet.cpp \
@@ -122,7 +116,7 @@ SOURCES += src/main.cpp\
     src/rc_crc32.c
 
 HEADERS  += src/mainwindow.h \
-	../../../Libraries/Spehleon/lib/ErrorDialogs/errordialog.h \
+	../../../Libraries/Spehleon/lib/Windows/errordialog.h \
 	../../../Libraries/Spehleon/lib/Support/counted_string.h \
 	../../../Libraries/Spehleon/lib/Support/counted_ptr.hpp \
 	../../../Libraries/Spehleon/lib/Support/shared_array.hpp \
@@ -137,16 +131,11 @@ HEADERS  += src/mainwindow.h \
 	../../../Libraries/Spehleon/lib/qt-gl/simpleshaderbase.h \
 	../../../Libraries/Spehleon/lib/qt-gl/viewparentinterface.h \
 	../../../Libraries/Spehleon/lib/universal_include.h \
-	../../../Libraries/fx-gltf/src/accessorreader.hpp \
-	../../../Libraries/fx-gltf/src/accessortypeinfo.hpp \
-	../../../Libraries/fx-gltf/src/bufferinfo.h \
-	../../../Libraries/fx-gltf/src/componenttypeinfo.hpp \
 	../../../Libraries/fx-gltf/src/fx/extensions/khr_materials.h \
 	../../../Libraries/fx-gltf/src/fx/extensions/msft_texture_dds.h \
 	../../../Libraries/fx-gltf/src/fx/gltf.h \
 	../../../Libraries/fx-gltf/src/fx/gltf_forward.hpp \
 	../../../Libraries/fx-gltf/src/gltf_stl_accessor.h \
-	errordialog.h \
 	src/Import/import_c16.h \
 	src/Import/linearizesprite.h \
 	src/Import/packspritesheet.h \
@@ -198,6 +187,5 @@ HEADERS  += src/mainwindow.h \
     src/qimageptr.hpp \
     src/rc_crc32.h
 
-FORMS    += src/mainwindow.ui \
-	errordialog.ui
+FORMS    += src/mainwindow.ui
 

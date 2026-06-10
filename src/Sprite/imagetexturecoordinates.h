@@ -3,6 +3,7 @@
 #include "Support/shared_array.hpp"
 #include "Support/counted_ptr.hpp"
 #include <glm/gtc/type_precision.hpp>
+#include <vector>
 
 namespace IO { struct Image; }
 namespace Sprites { struct Document; }
